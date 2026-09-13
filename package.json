@@ -2,10 +2,12 @@
   "name": "goated-build-lab",
   "private": true,
   "type": "module",
+  "packageManager": "npm@10.9.0",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
+    "start": "node server/src/index.js",
     "api:dev": "node --watch server/src/index.js",
     "api:start": "node server/src/index.js",
     "invite:make": "node server/scripts/make-invite-code.js"
