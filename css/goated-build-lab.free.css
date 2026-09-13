@@ -1,0 +1,4245 @@
+            /* \002500 \002500  tokens \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 
+   Light is the bare :root so the un-stamped (system) state resolves.
+   Dark redefines ONLY tokens, twice: once for prefers-color-scheme
+   (guarded so an explicit light choice beats a dark OS) and once for the
+   explicit [data-theme="dark"] stamp.                                   */
+            :root {
+                --ground: #F3F5F6;
+                --panel: #FFFFFF;
+                --raise: #FAFBFC;
+                --sunk: #ECEFF1;
+                --line: #DBE1E5;
+                --line-2: #EAEEF0;
+                --ink: #0E141A;
+                --ink-2: #55636E;
+                --ink-3: #8A98A2;
+                --amber: #B87116;
+                --amber-fill: #E39A34;
+                --cyan: #0A6FAE;
+                --cyan-fill: #00A8F8;
+                --violet: #6F45C4;
+                --rose: #C42150;
+                --bronze: #9A6636;
+                --silver: #7C8A96;
+                --gold: #B08419;
+                --shadow: 0 1px 2px rgba(14,20,26,.06), 0 10px 28px -18px rgba(14,20,26,.24);
+                --focus: #0A6FAE;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                :root:not([data-theme="light"]) {
+                    --ground:#0C1013;
+                    --panel: #141A20;
+                    --raise: #1B232A;
+                    --sunk: #0A0E11;
+                    --line: #26313A;
+                    --line-2: #1D252C;
+                    --ink: #E7EDF2;
+                    --ink-2: #90A0AC;
+                    --ink-3: #5E6E7A;
+                    --amber: #E39A34;
+                    --amber-fill: #E39A34;
+                    --cyan: #00A8F8;
+                    --cyan-fill: #00A8F8;
+                    --violet: #8E63E0;
+                    --rose: #E2456F;
+                    --bronze: #B87E4A;
+                    --silver: #94A3AF;
+                    --gold: #D9A82B;
+                    --shadow: 0 1px 2px rgba(0,0,0,.5), 0 14px 34px -20px rgba(0,0,0,.8);
+                    --focus: #00A8F8;
+                }
+            }
+
+            :root[data-theme="dark"] {
+                --ground: #0C1013;
+                --panel: #141A20;
+                --raise: #1B232A;
+                --sunk: #0A0E11;
+                --line: #26313A;
+                --line-2: #1D252C;
+                --ink: #E7EDF2;
+                --ink-2: #90A0AC;
+                --ink-3: #5E6E7A;
+                --amber: #E39A34;
+                --amber-fill: #E39A34;
+                --cyan: #00A8F8;
+                --cyan-fill: #00A8F8;
+                --violet: #8E63E0;
+                --rose: #E2456F;
+                --bronze: #B87E4A;
+                --silver: #94A3AF;
+                --gold: #D9A82B;
+                --shadow: 0 1px 2px rgba(0,0,0,.5), 0 14px 34px -20px rgba(0,0,0,.8);
+                --focus: #00A8F8;
+            }
+
+            * {
+                box-sizing: border-box
+            }
+
+            /* NO DOUBLE-TAP ZOOM. On a phone the board is a grid of small controls and a
+   quick second tap on a +/- reads as "zoom in" instead of "another point",
+   which is maddening on a slider you are nudging. `manipulation` removes the
+   double-tap-zoom gesture and nothing else: panning and PINCH ZOOM both still
+   work, so the page stays zoomable and this is not the user-scalable=no
+   accessibility mistake.
+
+   touch-action is not inherited, but the effective value for a touch is the
+   intersection along the ancestor chain, so putting it on <html> covers the
+   whole page -- and the sliders' own `touch-action:none` still wins where it
+   is stricter. One rule, and it fixes the native shell too, since the app
+   renders this same page. */
+            html {
+                -webkit-text-size-adjust: 100%;
+                touch-action: manipulation
+            }
+
+            body {
+                background: var(--ground);
+                color: var(--ink);
+                font-family: "IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+                font-size: 15px;
+                line-height: 1.5;
+                margin: 0;
+                padding: clamp(16px,2.6vw,34px) clamp(12px,2.6vw,30px) 72px;
+            }
+
+            .wrap {
+                max-width: 1240px;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                gap: 20px
+            }
+
+            .mono {
+                font-family: "IBM Plex Mono",ui-monospace,monospace;
+                font-variant-numeric: tabular-nums
+            }
+
+            h1,h2,h3,.lbl,.disc {
+                font-family: "Chakra Petch","Segoe UI",sans-serif
+            }
+
+            :focus-visible {
+                outline: 2px solid var(--focus);
+                outline-offset: 2px
+            }
+
+            @media (prefers-reduced-motion:reduce) {
+                * {
+                    animation: none!important;
+                    transition: none!important
+                }
+            }
+
+            /* \002500 \002500  identity band \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .ident {
+                background: var(--panel);
+                border: 1px solid var(--line);
+                box-shadow: var(--shadow);
+                display: grid;
+                grid-template-columns: minmax(0,1fr) auto;
+                gap: 14px 18px;
+                padding: 16px clamp(14px,2vw,22px);
+                align-items: center;
+            }
+
+            @media(max-width: 760px) {
+                .ident {
+                    grid-template-columns:1fr
+                }
+            }
+
+            /* THE LONGEST LINE ON THE PAGE. Distance to 99 is what the whole build aims at,
+   so it gets the full width of the card, as the game's own bar does. */
+            /* The board's footer, not a heading -- this is what you look at AFTER moving a
+   slider, so it sits under the thing you moved, as it does in the game. */
+            .potential {
+                display: grid;
+                grid-template-columns: auto minmax(0,1fr) auto;
+                gap: 14px;
+                align-items: center;
+                margin: 0 15px;
+                padding: 13px 0 15px;
+                border-top: 1px solid var(--line)
+            }
+
+            @media(max-width: 620px) {
+                .potential {
+                    grid-template-columns:1fr;
+                    gap: 7px
+                }
+            }
+
+            .pot-lbl {
+                font-family: "Chakra Petch",sans-serif;
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .16em;
+                text-transform: uppercase;
+                color: var(--ink-3);
+                white-space: nowrap
+            }
+
+            .pot-num {
+                font-size: 27px;
+                font-weight: 600;
+                line-height: 1;
+                color: var(--ink);
+                min-width: 1.9em;
+                text-align: right
+            }
+
+            .pot-num.max {
+                color: var(--cyan)
+            }
+
+            .eyebrow {
+                font-family: "Chakra Petch",sans-serif;
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .18em;
+                text-transform: uppercase;
+                color: var(--ink-3);
+                margin: 0 0 2px;
+            }
+
+            .arch {
+                font-size: clamp(23px,3.4vw,34px);
+                font-weight: 700;
+                line-height: 1.02;
+                margin: 0;
+                letter-spacing: -.01em;
+                text-wrap: balance
+            }
+
+            /* the name the build takes on once the breakers land -- only drawn when it
+   actually differs from the allocation's name */
+            .arch-after {
+                font-size: 13.5px;
+                color: var(--ink-2);
+                margin: 5px 0 0;
+                line-height: 1.3
+            }
+
+            .arch-after b {
+                color: var(--violet);
+                font-weight: 700
+            }
+
+            .af-why {
+                color: var(--ink-3);
+                font-size: 12px
+            }
+
+            /* the animations box that fills the gap under the attribute board */
+            .animbox {
+                grid-column: 1
+            }
+
+            .ab-cats {
+                display: grid;
+                grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
+                gap: 1px;
+                background: var(--line-2);
+                max-height: 330px;
+                overflow-y: auto
+            }
+
+            /* 48 tiles is a tall block. Capped and scrollable so the box stays a panel
+   rather than a page -- the list view (heights) is short and opts out. */
+            .ab-cats.ab-list {
+                max-height: none;
+                overflow: visible
+            }
+
+            .ab-cat {
+                background: var(--panel);
+                padding: 7px 10px;
+                display: grid;
+                grid-template-columns: minmax(0,1fr) auto;
+                gap: 2px 8px;
+                align-items: baseline;
+                cursor: pointer
+            }
+
+            .ab-cat:hover {
+                background: var(--raise)
+            }
+
+            .ab-cat-nm {
+                font-size: 11.5px;
+                color: var(--ink-2);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap
+            }
+
+            .ab-cat-n {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--ink)
+            }
+
+            .ab-cat-n.none {
+                color: var(--ink-3);
+                font-weight: 400
+            }
+
+            .ab-bar {
+                grid-column: 1/3;
+                height: 3px;
+                background: var(--sunk);
+                overflow: hidden
+            }
+
+            .ab-bar i {
+                display: block;
+                height: 100%;
+                background: var(--cyan)
+            }
+
+            .ab-near {
+                display: flex;
+                flex-direction: column;
+                border-top: 1px solid var(--line)
+            }
+
+            .ab-row {
+                display: grid;
+                grid-template-columns: minmax(0,1fr) auto auto;
+                gap: 3px 10px;
+                align-items: baseline;
+                padding: 6px 12px;
+                border-top: 1px solid var(--line-2)
+            }
+
+            .ab-row:first-child {
+                border-top: 0
+            }
+
+            .ab-nm {
+                font-size: 12.5px;
+                color: var(--ink)
+            }
+
+            .ab-cat2 {
+                grid-column: 1;
+                font-size: 10.5px;
+                color: var(--ink-3);
+                font-family: "IBM Plex Mono",monospace
+            }
+
+            .ab-req {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                color: var(--ink-3);
+                text-align: right
+            }
+
+            .ab-gap {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--amber);
+                white-space: nowrap
+            }
+
+            .ab-row.have .ab-gap {
+                color: var(--cyan)
+            }
+
+            .ab-foot {
+                margin: 0;
+                padding: 9px 12px;
+                border-top: 1px solid var(--line-2);
+                font-size: 11px;
+                color: var(--ink-3);
+                line-height: 1.5
+            }
+
+            .ab-foot b {
+                color: var(--ink-2)
+            }
+
+            .ab-foot button {
+                font: inherit;
+                font-size: 11px;
+                background: none;
+                border: 0;
+                padding: 0;
+                color: var(--cyan);
+                cursor: pointer;
+                text-decoration: underline
+            }
+
+            /* "worth hitting" -- the thresholds on a chosen must-reach attribute */
+            .thstrip {
+                grid-column: 1/-1;
+                display: flex;
+                gap: 6px;
+                align-items: center;
+                flex-wrap: wrap;
+                padding: 7px 0 1px
+            }
+
+            .thlbl {
+                font-size: 10px;
+                font-family: "IBM Plex Mono",monospace;
+                text-transform: uppercase;
+                letter-spacing: .07em;
+                color: var(--ink-3);
+                margin-right: 2px
+            }
+
+            .thchip {
+                font: inherit;
+                font-size: 12px;
+                font-family: "IBM Plex Mono",monospace;
+                font-weight: 600;
+                cursor: pointer;
+                background: var(--sunk);
+                color: var(--ink-2);
+                border: 1px solid var(--line);
+                border-radius: 4px;
+                padding: 4px 9px;
+                display: inline-flex;
+                align-items: baseline;
+                gap: 6px
+            }
+
+            .thchip i {
+                font-style: normal;
+                font-family: "IBM Plex Sans",sans-serif;
+                font-size: 10.5px;
+                font-weight: 400;
+                color: var(--ink-3)
+            }
+
+            .thchip:hover {
+                border-color: var(--cyan);
+                color: var(--ink)
+            }
+
+            .thchip.on {
+                background: color-mix(in srgb,var(--cyan) 18%,transparent);
+                border-color: var(--cyan);
+                color: var(--cyan)
+            }
+
+            .thchip.on i {
+                color: var(--cyan)
+            }
+
+            .thchip.lock {
+                color: var(--ink-3);
+                font-weight: 400;
+                font-family: "IBM Plex Sans",sans-serif
+            }
+
+            .thchip.lock:hover {
+                border-color: var(--amber);
+                color: var(--amber)
+            }
+
+            .an-go {
+                font: inherit;
+                font-size: 10.5px;
+                cursor: pointer;
+                background: var(--sunk);
+                color: var(--ink-2);
+                border: 1px solid var(--line);
+                border-radius: 3px;
+                padding: 2px 7px;
+                margin-left: 8px;
+                white-space: nowrap
+            }
+
+            .an-go:hover {
+                border-color: var(--cyan);
+                color: var(--cyan)
+            }
+
+            .an-row .an-go {
+                margin-left: 0
+            }
+
+            .ab-cat.on {
+                background: color-mix(in srgb,var(--cyan) 14%,transparent)
+            }
+
+            .ab-cat.on .ab-cat-nm {
+                color: var(--ink)
+            }
+
+            .ab-open {
+                display: flex;
+                align-items: baseline;
+                gap: 8px;
+                flex-wrap: wrap;
+                padding: 8px 12px;
+                border-bottom: 1px solid var(--line-2);
+                font-size: 11.5px;
+                color: var(--ink-3);
+                font-family: "IBM Plex Mono",monospace
+            }
+
+            .ab-open b {
+                color: var(--ink);
+                font-family: "IBM Plex Sans",sans-serif;
+                font-size: 12.5px
+            }
+
+            .ab-back {
+                margin-left: auto;
+                font: inherit;
+                font-size: 11px;
+                background: none;
+                border: 0;
+                padding: 0;
+                color: var(--cyan);
+                cursor: pointer;
+                text-decoration: underline
+            }
+
+            .ab-row.have .ab-nm {
+                color: var(--ink-2)
+            }
+
+            .ab-ctl {
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap;
+                align-items: center;
+                padding: 9px 12px;
+                border-bottom: 1px solid var(--line-2)
+            }
+
+            /* align-items:center on the ROW, not stretch: the row defaulted to stretch, so
+   one chip whose count wrapped to a second line made every chip that tall and
+   left the labels floating at the top of empty pills. `flex:none` on the count
+   stops that wrap happening in the first place. */
+            .ab-sz,.ab-hts {
+                font: inherit;
+                font-size: 11px;
+                line-height: 1.35;
+                cursor: pointer;
+                background: var(--sunk);
+                color: var(--ink-2);
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                padding: 4px 11px;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                white-space: nowrap;
+                flex: none
+            }
+
+            .ab-sz i {
+                flex: none
+            }
+
+            .ab-sz i {
+                font-style: normal;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 10.5px;
+                color: var(--ink-3)
+            }
+
+            .ab-sz:hover,.ab-hts:hover {
+                border-color: var(--cyan);
+                color: var(--ink)
+            }
+
+            .ab-sz.on {
+                background: color-mix(in srgb,var(--cyan) 20%,transparent);
+                border-color: var(--cyan);
+                color: var(--cyan)
+            }
+
+            .ab-sz.on i {
+                color: var(--cyan)
+            }
+
+            /* a class this frame cannot reach is still SAID -- as a line of text, not as
+   a dead button nobody can press */
+            .ab-not {
+                flex: 1 0 100%;
+                margin: 2px 0 0;
+                font-size: 10.5px;
+                color: var(--ink-3);
+                font-family: "IBM Plex Mono",monospace
+            }
+
+            .ab-not b {
+                color: var(--ink-2);
+                font-weight: 600
+            }
+
+            .ab-sort {
+                font: inherit;
+                font-size: 11px;
+                background: var(--sunk);
+                color: var(--ink-2);
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                padding: 3px 9px;
+                cursor: pointer;
+                margin-left: auto
+            }
+
+            .ab-sort:focus {
+                outline: 0;
+                border-color: var(--cyan)
+            }
+
+            .ab-sort + .ab-hts {
+                margin-left: 0
+            }
+
+            /* \002500 \002500  badge builder \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .bp-act {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                padding: 0 15px 12px;
+                flex-wrap: wrap
+            }
+
+            .bp-act button {
+                font-size: 12px;
+                padding: 8px 14px
+            }
+
+            .bp-list {
+                border-top: 1px solid var(--line);
+                max-height: none
+            }
+
+            .bp-grp {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                gap: 8px;
+                padding: 9px 15px 5px;
+                border-top: 1px solid var(--line);
+                background: var(--sunk);
+                position: sticky;
+                top: 0;
+                z-index: 1
+            }
+
+            .bp-g-n {
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .13em;
+                text-transform: uppercase;
+                color: var(--ink-2)
+            }
+
+            .bp-g-c {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                color: var(--ink-3)
+            }
+
+            .bp-g-c.full {
+                color: var(--amber)
+            }
+
+            .bp-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                padding: 6px 15px;
+                border-top: 1px solid var(--line-2)
+            }
+
+            .bp-row.on {
+                background: var(--raise)
+            }
+
+            .bp-nm {
+                font-size: 12.5px;
+                color: var(--ink-2);
+                min-width: 0;
+                flex: 1
+            }
+
+            .bp-row.on .bp-nm {
+                color: var(--ink);
+                font-weight: 600
+            }
+
+            .bp-req {
+                display: block;
+                font-style: normal;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 10.5px;
+                font-weight: 400;
+                color: var(--cyan);
+                margin: 2px 0 0
+            }
+
+            .bp-tiers {
+                display: flex;
+                gap: 3px;
+                flex: none
+            }
+
+            .bp-t {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 10px;
+                line-height: 1.15;
+                padding: 4px 5px;
+                min-width: 34px;
+                background: var(--panel);
+                color: var(--ink-3);
+                border: 1px solid var(--line);
+                cursor: pointer;
+                display: grid;
+                gap: 1px;
+                text-transform: none;
+                letter-spacing: 0
+            }
+
+            .bp-t i {
+                font-style: normal;
+                font-size: 10.5px;
+                font-weight: 600;
+                color: var(--ink-2)
+            }
+
+            .bp-t:hover:not(:disabled) {
+                border-color: var(--cyan);
+                color: var(--ink-2)
+            }
+
+            .bp-t.on {
+                border-color: var(--cyan);
+                background: var(--sunk);
+                color: var(--cyan)
+            }
+
+            .bp-t.on i {
+                color: var(--cyan)
+            }
+
+            .bp-t:disabled {
+                opacity: .32;
+                cursor: default
+            }
+
+            .bp-t.imp {
+                text-decoration: line-through
+            }
+
+            .bp-hint {
+                color: var(--ink-3)
+            }
+
+            .bp-warn {
+                color: var(--amber);
+                font-weight: 600
+            }
+
+            @media(max-width: 720px) {
+                .bp-row {
+                    flex-wrap:wrap
+                }
+
+                .bp-tiers {
+                    width: 100%;
+                    justify-content: flex-start
+                }
+            }
+
+            .ab-hts {
+                margin-left: auto
+            }
+
+            .ab-hts.on {
+                background: color-mix(in srgb,var(--violet) 22%,transparent);
+                border-color: var(--violet);
+                color: var(--violet)
+            }
+
+            .ab-cats.ab-list {
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+                background: transparent
+            }
+
+            .ab-ht {
+                display: grid;
+                grid-template-columns: auto auto minmax(0,1fr) auto;
+                gap: 2px 10px;
+                align-items: baseline;
+                padding: 5px 12px;
+                border-top: 1px solid var(--line-2)
+            }
+
+            .ab-ht:first-child {
+                border-top: 0
+            }
+
+            .ab-ht.here {
+                background: color-mix(in srgb,var(--cyan) 10%,transparent)
+            }
+
+            .ab-ht-h {
+                font-size: 12.5px;
+                color: var(--ink);
+                min-width: 3.2em
+            }
+
+            .ab-ht-n {
+                font-size: 12px;
+                color: var(--ink-2);
+                min-width: 3em;
+                text-align: right
+            }
+
+            .ab-ht-d {
+                font-size: 11px;
+                color: var(--ink-3);
+                min-width: 5.5em
+            }
+
+            .ab-ht-d.dn {
+                color: var(--amber)
+            }
+
+            .ab-ht-d.up {
+                color: var(--cyan)
+            }
+
+            .ab-ht-w {
+                grid-column: 2/5;
+                font-size: 10.5px;
+                color: var(--ink-3)
+            }
+
+            .ab-ht .ab-bar {
+                grid-column: 3;
+                height: 4px;
+                align-self: center
+            }
+
+            .arch-after em {
+                font-style: normal;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 10px;
+                letter-spacing: .07em;
+                text-transform: uppercase;
+                color: var(--ink-3);
+                margin-right: 6px
+            }
+
+            .body-line {
+                font-size: 13px;
+                color: var(--ink-2);
+                margin: 6px 0 0
+            }
+
+            .body-line b {
+                color: var(--ink);
+                font-weight: 600
+            }
+
+            /* Who the build plays like, in the header so it is visible from every view --
+   the full panel lives in the Shades tab, but the answer belongs next to the
+   build itself. */
+            .shade-line {
+                font-size: 12.5px;
+                color: var(--ink-3);
+                margin: 4px 0 0;
+                cursor: pointer
+            }
+
+            .shade-line:hover b {
+                color: var(--violet)
+            }
+
+            .shade-line b {
+                color: var(--ink-2);
+                font-weight: 600
+            }
+
+            .shade-line s {
+                text-decoration: none;
+                color: var(--ink-3);
+                padding: 0 5px
+            }
+
+            .shade-line em {
+                font-style: normal;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 10px;
+                letter-spacing: .06em;
+                text-transform: uppercase;
+                color: var(--ink-3);
+                margin-right: 6px
+            }
+
+            /* the figure only this tool can show: raw rating against the 99.0000 wall */
+            .gauge {
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+                min-width: 0
+            }
+
+            .ovr-row {
+                display: flex;
+                align-items: baseline;
+                gap: 10px;
+                justify-content: flex-end
+            }
+
+            .theme {
+                margin-right: auto;
+                align-self: center;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                letter-spacing: .04em;
+                padding: 5px 10px;
+                cursor: pointer;
+                background: var(--sunk);
+                color: var(--ink-2);
+                border: 1px solid var(--line);
+                border-radius: 2px
+            }
+
+            .theme:hover {
+                color: var(--ink);
+                border-color: var(--cyan)
+            }
+
+            .theme .t-ico {
+                font-size: 13px;
+                line-height: 1
+            }
+
+            .ovr {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 46px;
+                font-weight: 600;
+                line-height: .9;
+                letter-spacing: -.02em
+            }
+
+            .ovr.max {
+                color: var(--cyan)
+            }
+
+            .ovr-lbl {
+                font-family: "Chakra Petch",sans-serif;
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .16em;
+                text-transform: uppercase;
+                color: var(--ink-3)
+            }
+
+            .wall {
+                display: flex;
+                flex-direction: column;
+                gap: 4px
+            }
+
+            .wall-track {
+                position: relative;
+                height: 17px;
+                background: var(--sunk);
+                border: 1px solid var(--line-2);
+                overflow: hidden
+            }
+
+            .wall-fill {
+                position: absolute;
+                inset: 0 auto 0 0;
+                background: var(--cyan-fill);
+                transition: width .12s linear
+            }
+
+            .wall-fill.hot {
+                background: var(--rose)
+            }
+
+            /* the last four points of raw -- 5% of the bar, and where every real decision
+   about a build actually happens */
+            .wall-zone {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 94.6%;
+                right: 0;
+                border-left: 1px solid var(--line);
+                background: repeating-linear-gradient(135deg,transparent 0 3px, color-mix(in srgb,var(--ink-3) 22%,transparent) 3px 6px);
+                pointer-events: none
+            }
+
+            /* \002500 \002500  which attributes still have room, and what just moved on its own \002500 \002500  */
+            .head {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 10px;
+                color: var(--cyan);
+                opacity: .8;
+                white-space: nowrap
+            }
+
+            .head:empty {
+                display: none
+            }
+
+            .row.frozen {
+                opacity: .44
+            }
+
+            .row.frozen .bar {
+                filter: saturate(.35)
+            }
+
+            .row.canraise .nm b {
+                color: var(--ink)
+            }
+
+            .mv {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                font-style: normal;
+                font-weight: 600;
+                padding: 1px 6px;
+                white-space: nowrap;
+                border-radius: 2px
+            }
+
+            .mv:empty {
+                display: none
+            }
+
+            .mv.dn {
+                color: var(--rose);
+                background: color-mix(in srgb,var(--rose) 22%,transparent);
+                box-shadow: inset 0 0 0 1px color-mix(in srgb,var(--rose) 45%,transparent)
+            }
+
+            .mv.up {
+                color: var(--cyan);
+                background: color-mix(in srgb,var(--cyan) 22%,transparent);
+                box-shadow: inset 0 0 0 1px color-mix(in srgb,var(--cyan) 45%,transparent)
+            }
+
+            /* dragged by the graph, not by you -- has to read at a glance */
+            .row.moved {
+                background: color-mix(in srgb,var(--amber) 15%,transparent);
+                box-shadow: inset 4px 0 0 var(--amber);
+                animation: nudge .5s ease-out
+            }
+
+            .row.moved .nm b {
+                color: var(--ink);
+                font-weight: 600
+            }
+
+            .row.moved.frozen {
+                opacity: .85
+            }
+
+            @keyframes nudge {
+                0% {
+                    background: color-mix(in srgb,var(--amber) 46%,transparent)
+                }
+
+                100% {
+                    background: color-mix(in srgb,var(--amber) 15%,transparent)
+                }
+            }
+
+            .wall-txt {
+                display: flex;
+                justify-content: space-between;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                color: var(--ink-3);
+                font-variant-numeric: tabular-nums
+            }
+
+            .wall-txt b {
+                color: var(--ink-2);
+                font-weight: 600
+            }
+
+            .wall-txt .hot {
+                color: var(--rose)
+            }
+
+            /* \002500 \002500  the finder: tick boxes are free, words cost one model call \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .finder {
+                background: var(--panel);
+                border: 1px solid var(--line);
+                box-shadow: var(--shadow);
+                display: flex;
+                flex-direction: column
+            }
+
+            .fbar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                align-items: flex-end;
+                padding: 13px clamp(14px,2vw,20px)
+            }
+
+            .fgrp {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                min-width: 0
+            }
+
+            .fgrp>.lbl {
+                white-space: nowrap
+            }
+
+            /* The one .lbl that is a sentence rather than a field name. Wrapping it is
+   right at every width -- it only fit on one line on desktop by luck of the
+   container being wide. Specificity 0-3-0 so it beats the nowrap above
+   regardless of source order. */
+            .fgrp>.lbl.lbl-long {
+                white-space: normal;
+                line-height: 1.6
+            }
+
+            .fgrp select {
+                background: var(--raise);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                padding: 6px 8px;
+                font: inherit;
+                font-size: 14px
+            }
+
+            .cats {
+                display: flex;
+                gap: 5px;
+                flex-wrap: wrap
+            }
+
+            .cat {
+                border: 1px solid var(--line);
+                background: var(--raise);
+                color: var(--ink-3);
+                font-family: "IBM Plex Sans",sans-serif;
+                font-size: 12px;
+                font-weight: 500;
+                text-transform: none;
+                letter-spacing: 0;
+                padding: 5px 9px;
+                display: flex;
+                gap: 6px;
+                align-items: baseline
+            }
+
+            .cat i {
+                font-style: normal;
+                font-size: 10px;
+                font-family: "Chakra Petch",sans-serif;
+                letter-spacing: .08em;
+                text-transform: uppercase;
+                opacity: .7
+            }
+
+            .cat.good {
+                border-color: var(--amber);
+                color: var(--amber)
+            }
+
+            .cat.excel {
+                border-color: var(--cyan);
+                color: var(--cyan);
+                background: color-mix(in srgb,var(--cyan) 10%,transparent)
+            }
+
+            .floors {
+                display: flex;
+                flex-direction: column;
+                gap: 5px
+            }
+
+            .floorpick {
+                display: flex;
+                gap: 5px;
+                align-items: center;
+                flex-wrap: wrap
+            }
+
+            .floorpick .fMode {
+                max-width: 160px
+            }
+
+            .rmf {
+                background: none;
+                border: 0;
+                color: var(--ink-3);
+                font-size: 17px;
+                line-height: 1;
+                cursor: pointer;
+                padding: 0 4px
+            }
+
+            .rmf:hover {
+                color: var(--ink)
+            }
+
+            .addfloor {
+                align-self: flex-start;
+                margin-top: 5px;
+                background: none;
+                cursor: pointer;
+                border: 1px dashed var(--ink-3);
+                color: var(--ink-3);
+                font: inherit;
+                font-size: 12px;
+                padding: 3px 9px;
+                border-radius: 4px
+            }
+
+            .addfloor:hover {
+                color: var(--ink);
+                border-color: var(--ink)
+            }
+
+            .floorpick select {
+                min-width: 132px
+            }
+
+            /* the second-choice number reads as subordinate to the first, not as another
+   equal field -- it is only ever used when the first one cannot be met */
+            /* \002500 \002500  animations \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .an-note {
+                margin: 0 0 10px;
+                font-size: 12px;
+                color: var(--ink-3);
+                line-height: 1.55;
+                max-width: 70ch
+            }
+
+            .an-list {
+                display: flex;
+                flex-direction: column;
+                gap: 1px;
+                margin-top: 10px
+            }
+
+            .an-row {
+                display: grid;
+                grid-template-columns: minmax(140px,1.4fr) minmax(110px,1fr) minmax(120px,1.1fr) auto;
+                gap: 10px;
+                align-items: center;
+                padding: 6px 9px;
+                border-radius: 4px;
+                background: var(--sunk);
+                font-size: 12.5px
+            }
+
+            .an-row.have {
+                background: color-mix(in srgb,var(--cyan) 9%,var(--sunk))
+            }
+
+            .an-row.ht {
+                opacity: .55
+            }
+
+            .an-nm {
+                color: var(--ink);
+                font-weight: 500
+            }
+
+            .an-cat {
+                color: var(--ink-3);
+                font-size: 11px
+            }
+
+            .an-req {
+                color: var(--ink-2);
+                font-size: 11.5px
+            }
+
+            .an-t {
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: .05em;
+                padding: 1px 6px;
+                border-radius: 3px;
+                white-space: nowrap;
+                justify-self: end
+            }
+
+            .an-t.have {
+                background: color-mix(in srgb,var(--cyan) 22%,transparent);
+                color: var(--cyan)
+            }
+
+            .an-t.close {
+                background: color-mix(in srgb,var(--amber) 20%,transparent);
+                color: var(--amber)
+            }
+
+            .an-t.no,.an-t.ht {
+                color: var(--ink-3);
+                border: 1px solid var(--line)
+            }
+
+            .an-more,.an-empty {
+                margin: 9px 0 0;
+                font-size: 12px;
+                color: var(--ink-3)
+            }
+
+            @media(max-width: 700px) {
+                .an-row {
+                    grid-template-columns:1fr auto;
+                    row-gap: 2px
+                }
+
+                .an-cat,.an-req {
+                    grid-column: 1/-1
+                }
+            }
+
+            .falt-or {
+                font-size: 11px;
+                color: var(--ink-3);
+                letter-spacing: .04em
+            }
+
+            .floorpick .fAlt {
+                width: 52px;
+                opacity: .75
+            }
+
+            .floorpick .fAlt:focus,.floorpick .fAlt:not(:placeholder-shown) {
+                opacity: 1
+            }
+
+            .floorpick input {
+                width: 62px;
+                background: var(--raise);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                padding: 6px 8px;
+                font: inherit;
+                font-size: 14px;
+                font-family: "IBM Plex Mono",monospace;
+                text-align: center
+            }
+
+            .fspacer {
+                flex: 1
+            }
+
+            .words {
+                border-top: 1px solid var(--line-2);
+                padding: 11px clamp(14px,2vw,20px);
+                display: flex;
+                flex-direction: column;
+                gap: 9px
+            }
+
+            .words-head {
+                font-size: 11.5px;
+                color: var(--ink-3);
+                display: flex;
+                gap: 8px;
+                align-items: baseline
+            }
+
+            .words-head b {
+                font-family: "Chakra Petch",sans-serif;
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .13em;
+                text-transform: uppercase;
+                color: var(--ink-2)
+            }
+
+            .results {
+                border-top: 1px solid var(--line-2);
+                padding: 11px clamp(14px,2vw,20px);
+                display: flex;
+                flex-direction: column;
+                gap: 9px
+            }
+
+            .results:empty {
+                display: none
+            }
+
+            .rhead {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                gap: 10px;
+                flex-wrap: wrap
+            }
+
+            .sortby {
+                display: flex;
+                gap: 5px
+            }
+
+            .sortby button {
+                font-size: 11px;
+                padding: 3px 8px
+            }
+
+            .sortby button.on {
+                border-color: var(--cyan);
+                color: var(--cyan)
+            }
+
+            /* \002500 \002500  the brief: one sentence in, a real build out \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .brief {
+                background: var(--panel);
+                border: 1px solid var(--line);
+                box-shadow: var(--shadow);
+                padding: 14px clamp(14px,2vw,20px);
+                display: flex;
+                flex-direction: column;
+                gap: 10px
+            }
+
+            .brief-row {
+                display: flex;
+                gap: 9px;
+                align-items: stretch
+            }
+
+            #ask {
+                flex: 1;
+                min-width: 0;
+                background: var(--raise);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                padding: 9px 12px;
+                font: inherit;
+                font-size: 15px
+            }
+
+            #ask::placeholder {
+                color: var(--ink-3)
+            }
+
+            #go {
+                flex: 0 0 auto;
+                padding: 9px 16px;
+                font-size: 12.5px
+            }
+
+            #go:disabled {
+                opacity: .55;
+                cursor: default
+            }
+
+            .brief-note {
+                margin: 0;
+                font-size: 12.5px;
+                color: var(--ink-2);
+                line-height: 1.45
+            }
+
+            .brief-note b {
+                color: var(--ink);
+                font-weight: 600
+            }
+
+            .brief-note.warn {
+                color: var(--rose)
+            }
+
+            .egs {
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap
+            }
+
+            .eg {
+                background: transparent;
+                border: 1px dashed var(--line);
+                color: var(--ink-3);
+                font-family: "IBM Plex Sans",sans-serif;
+                font-size: 12px;
+                font-weight: 400;
+                text-transform: none;
+                letter-spacing: 0;
+                padding: 4px 9px
+            }
+
+            .eg:hover {
+                color: var(--cyan);
+                border-color: var(--cyan);
+                border-style: solid
+            }
+
+            .alts {
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap
+            }
+
+            .alts:empty {
+                display: none
+            }
+
+            .alt {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1px;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11.5px;
+                font-weight: 500;
+                text-transform: none;
+                letter-spacing: 0;
+                padding: 5px 10px;
+                line-height: 1.3
+            }
+
+            .alt em {
+                font-style: normal;
+                font-size: 10.5px;
+                color: var(--ink-3)
+            }
+
+            .alt.on {
+                border-color: var(--cyan);
+                color: var(--cyan)
+            }
+
+            .alt.on em {
+                color: var(--cyan)
+            }
+
+            /* \002500 \002500  frame strip \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .frame {
+                background: var(--panel);
+                border: 1px solid var(--line);
+                display: grid;
+                grid-template-columns: repeat(auto-fit,minmax(178px,1fr));
+                gap: 0;
+            }
+
+            .fcell {
+                padding: 11px 15px;
+                border-right: 1px solid var(--line-2);
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                min-width: 0;
+                justify-content: center
+            }
+
+            .fcell:last-child {
+                border-right: 0
+            }
+
+            /* THE DEAD SPACE WAS A DEFAULT PARAGRAPH MARGIN. `.bounds` is a <p> and never
+   had its UA margin reset, so every control cell carried 21px of nothing
+   (10.5 top + 10.5 bottom) and the row stood at 107px against 86px of real
+   content. That slack, multiplied across four bordered cells, IS the empty
+   strip with the dividers through it. Measured, not guessed: the cell's own
+   children summed to 75.3px + 10px of flex gaps + 22px of padding = 107.3,
+   which is the row track to the quarter-pixel. */
+            .fcell .bounds {
+                margin: 0
+            }
+
+            /* THE BUTTON CELL WAS SETTING THE ROW HEIGHT. `.acts` holds four buttons plus
+   a checkbox and wrapped to three lines inside its track, forcing the row to
+   107px and leaving ~55px of dead space under every control cell -- the empty
+   strip with the dividers through it at the top of the page.
+
+   Widening it to two tracks was NOT enough and the measurement is why: at
+   1900px that gave it 633px against 604px of content, so the checkbox wrapped
+   by ONE pixel and the row stayed 107. A fix with a 1px margin is not a fix.
+   It gets the full width on its own row instead, which cannot be outgrown. */
+            .frame > .acts {
+                grid-column: 1/-1;
+                border-top: 1px solid var(--line-2);
+                border-right: 0;
+                padding: 9px 15px
+            }
+
+            @media(max-width: 900px) {
+                .fcell {
+                    border-right:0;
+                    border-bottom: 1px solid var(--line-2)
+                }
+            }
+
+            .fhead {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                gap: 8px
+            }
+
+            .lbl {
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .13em;
+                text-transform: uppercase;
+                color: var(--ink-3)
+            }
+
+            .fval {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 15px;
+                font-weight: 600;
+                color: var(--ink)
+            }
+
+            .fcell input[type=range] {
+                width: 100%;
+                accent-color: var(--amber-fill);
+                height: 16px;
+                margin: 0
+            }
+
+            .fcell select {
+                width: 100%;
+                background: var(--raise);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                padding: 5px 7px;
+                font: inherit;
+                font-size: 14px
+            }
+
+            .bounds {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 10.5px;
+                color: var(--ink-3)
+            }
+
+            .acts {
+                display: flex;
+                gap: 7px;
+                flex-wrap: wrap;
+                padding: 11px 15px;
+                align-items: center
+            }
+
+            .keepname {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 11.5px;
+                color: var(--ink-2);
+                cursor: pointer;
+                white-space: nowrap;
+                user-select: none
+            }
+
+            .keepname input {
+                margin: 0;
+                accent-color: var(--cyan-fill)
+            }
+
+            .keepname:hover {
+                color: var(--ink)
+            }
+
+            button {
+                background: var(--raise);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                padding: 6px 11px;
+                font-family: "Chakra Petch",sans-serif;
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: .07em;
+                text-transform: uppercase;
+                cursor: pointer
+            }
+
+            button:hover {
+                border-color: var(--ink-3)
+            }
+
+            button.go {
+                border-color: var(--cyan);
+                color: var(--cyan)
+            }
+
+            /* \002500 \002500  working surface \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .work {
+                display: grid;
+                grid-template-columns: minmax(0,1fr) 318px;
+                gap: 20px;
+                align-items: start
+            }
+
+            /* PLACE ALL THREE EXPLICITLY. #animBox declares grid-column:1, and grid
+   auto-placement does not backtrack: once the cursor had moved to row 2 to
+   place it, the auto-placed .rail went to row 2 column 2 -- BESIDE the
+   animation box, leaving the entire cell next to the attribute board empty and
+   stranding ~440px of black under the box. Both reported gaps, one cause.
+   Spanning the rail across both rows also lets its `position:sticky` follow
+   you down past the board, which it never could while boxed into one row. */
+            .work > :nth-child(1) {
+                grid-column: 1;
+                grid-row: 1
+            }
+
+            .work > #animBox {
+                grid-column: 1;
+                grid-row: 2
+            }
+
+            .work > .rail {
+                grid-column: 2;
+                grid-row: 1/span 2
+            }
+
+            @media(max-width: 1080px) {
+                .work {
+                    grid-template-columns:1fr
+                }
+
+                /* stacked: one column, source order, no explicit placement to fight it */
+                .work > :nth-child(1),.work > #animBox,.work > .rail {
+                    grid-column: 1;
+                    grid-row: auto
+                }
+            }
+
+            .sheet {
+                background: var(--panel);
+                border: 1px solid var(--line);
+                box-shadow: var(--shadow)
+            }
+
+            .sheet-head {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 15px;
+                border-bottom: 1px solid var(--line);
+                flex-wrap: wrap
+            }
+
+            .hrow {
+                display: flex;
+                gap: 6px;
+                margin-right: auto
+            }
+
+            .hrow button {
+                font-size: 11px;
+                padding: 4px 9px
+            }
+
+            .hrow button:disabled {
+                opacity: .38;
+                cursor: default;
+                border-color: var(--line-2)
+            }
+
+            /* What the constraint graph just did, in words. The row tags say WHICH moved;
+   this says what happened and why. */
+            /* THE CASCADE NOTICE IS A TOAST, NOT A BANNER.
+   In the flow it pushed the whole board down every time a slider moved, so the
+   row you were nudging jumped out from under your finger on every single
+   interaction -- and the +/- you were tapping repeatedly moved with it.
+
+   The row tags (50 -> 49 beside the name, plus the accent edge) already say
+   WHICH attributes moved, in place and with no reflow. The notice only earns
+   its place for the ones scrolled off screen, so it goes where it can be read
+   from anywhere and costs no layout: pinned to the bottom, over the content,
+   gone on its own after a few seconds.
+
+   #planDrop keeps the old in-flow treatment -- it reports a decision, not a
+   side effect, and is not emitted on every drag. */
+            #cascade {
+                position: fixed;
+                left: 10px;
+                right: 10px;
+                z-index: 55;
+                bottom: calc(10px + env(safe-area-inset-bottom));
+                margin: 0;
+                padding: 10px 13px;
+                border-radius: 7px;
+                background: var(--raise);
+                border: 1px solid var(--amber);
+                box-shadow: 0 10px 30px rgba(0,0,0,.45);
+                cursor: pointer;
+                max-height: 38vh;
+                overflow: auto;
+                max-width: 560px;
+                margin-inline:auto}
+
+            @media(min-width: 721px) {
+                #cascade {
+                    left:auto;
+                    right: 18px;
+                    width: 430px
+                }
+            }
+
+            .cascade {
+                margin: 0;
+                padding: 9px 15px;
+                font-size: 12.5px;
+                line-height: 1.45;
+                color: var(--ink-2);
+                background: color-mix(in srgb,var(--amber) 11%,transparent);
+                border-bottom: 1px solid color-mix(in srgb,var(--amber) 34%,transparent)
+            }
+
+            .cascade b {
+                color: var(--ink)
+            }
+
+            .cascade em {
+                font-style: normal;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11.5px;
+                color: var(--amber);
+                background: color-mix(in srgb,var(--amber) 15%,transparent);
+                padding: 1px 5px;
+                white-space: nowrap
+            }
+
+            .sheet-head h2 {
+                font-size: 14px;
+                font-weight: 600;
+                letter-spacing: .11em;
+                text-transform: uppercase;
+                margin: 0
+            }
+
+            .hint {
+                font-size: 11.5px;
+                color: var(--ink-3)
+            }
+
+            .disc {
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .15em;
+                text-transform: uppercase;
+                color: var(--ink-3);
+                padding: 13px 15px 5px;
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline
+            }
+
+            .disc span {
+                font-family: "IBM Plex Mono",monospace;
+                letter-spacing: 0;
+                font-size: 11px
+            }
+
+            /* \002500 \002500  the attribute board \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 
+   Three columns of disciplines, all 21 visible without scrolling, the way the
+   game's own Attribute Editor does it. CSS columns rather than grid so the
+   groups balance themselves; `break-inside:avoid` keeps a discipline whole. */
+            #attrs {
+                display: grid;
+                grid-template-columns: repeat(3,minmax(0,1fr));
+                gap: 0 16px;
+                padding: 4px 15px 16px;
+                align-items: start
+            }
+
+            @media(max-width: 1180px) {
+                #attrs {
+                    grid-template-columns:repeat(2,minmax(0,1fr))
+                }
+            }
+
+            @media(max-width: 720px) {
+                /* ON ONE COLUMN THE 2K PAIRING READS AS SCRAMBLED. The board is three .bcol
+     stacks paired the way the game pairs them (Finishing+Rebounding,
+     Shooting+Defense, Playmaking+Physicals) so the columns square off at seven
+     attributes each. Collapse that to a single column and the groups come out
+     in COLUMN order -- Finishing, Rebounding, Shooting, Defense -- so anyone
+     checking a build against a card top-to-bottom hits Off Rebound where they
+     expect Mid-Range and concludes the numbers are wrong. They are not; the
+     ORDER is.
+
+     `display:contents` dissolves the columns on a phone so the six groups are
+     direct children again, and `order` puts them back in the game's own
+     sequence. No JS change: data-g is already on every group. *//* align-items:start CHANGES MEANING when the display does. On the desktop
+     grid it stops rows stretching VERTICALLY, which is what the board wants.
+     Flipping to flex-direction:column here makes the cross axis HORIZONTAL, so
+     the same declaration silently became "shrink every group to its content"
+     -- measured at 393px: the board was 368 wide and each group only 278, with
+     73px of dead space down the right on every phone. Restate it. */#attrs {
+                    display:flex;
+                    flex-direction: column;
+                    align-items: stretch
+                }
+
+                #attrs .bcol {
+                    display: contents
+                }
+
+                #attrs .grp[data-g="Finishing"] {
+                    order: 1
+                }
+
+                #attrs .grp[data-g="Shooting"] {
+                    order: 2
+                }
+
+                #attrs .grp[data-g="Playmaking"] {
+                    order: 3
+                }
+
+                #attrs .grp[data-g="Defense"] {
+                    order: 4
+                }
+
+                #attrs .grp[data-g="Rebounding"] {
+                    order: 5
+                }
+
+                #attrs .grp[data-g="Physicals"] {
+                    order: 6
+                }
+            }
+
+            .bcol {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                min-width: 0
+            }
+
+            /* Each discipline carries its own accent, as the game does -- with six groups
+   side by side the board reads as one wall without it. Percentages are kept low
+   and mixed against --panel so the same rule works on both grounds. */
+            .grp[data-g="Finishing"] {
+                --acc: #3E8FD8
+            }
+
+            .grp[data-g="Shooting"] {
+                --acc: #3AA76D
+            }
+
+            .grp[data-g="Playmaking"] {
+                --acc: #D08A2C
+            }
+
+            .grp[data-g="Defense"] {
+                --acc: #CE4A5C
+            }
+
+            .grp[data-g="Rebounding"] {
+                --acc: #8A6BD1
+            }
+
+            .grp[data-g="Physicals"] {
+                --acc: #C2A02E
+            }
+
+            .grp {
+                display: block;
+                margin: 0;
+                --acc: var(--ink-3);
+                background: color-mix(in srgb,var(--acc) 7%,var(--panel));
+                border: 1px solid color-mix(in srgb,var(--acc) 26%,transparent);
+                border-top: 2px solid var(--acc)
+            }
+
+            .grp .disc {
+                color: var(--acc);
+                opacity: 1;
+                padding: 9px 9px 4px
+            }
+
+            .grp .disc span {
+                color: var(--ink-3)
+            }
+
+            .grp .row {
+                border-top-color: color-mix(in srgb,var(--acc) 16%,transparent)
+            }
+
+            .grp .row:first-of-type {
+                border-top: 0
+            }
+
+            /* allocated takes the discipline colour; breaker GAIN stays cyan everywhere,
+   because it is a different quantity and must stay legible as one */
+            .grp .alloc {
+                background: color-mix(in srgb,var(--acc) 82%,transparent)
+            }
+
+            .grp .bar {
+                background: color-mix(in srgb,var(--acc) 12%,var(--sunk))
+            }
+
+            /* one attribute = a three-line cell: identity, bar, controls */
+            .row {
+                display: grid;
+                gap: 3px 8px;
+                padding: 6px 7px;
+                grid-template-columns: 84px minmax(0,1fr) auto;
+                grid-template-areas: "n n f" "b b b" "s l l";
+                border-top: 1px solid var(--line-2)
+            }
+
+            .row .nm {
+                grid-area: n;
+                min-width: 0
+            }
+
+            .row .fin {
+                grid-area: f
+            }
+
+            .row .bar {
+                grid-area: b
+            }
+
+            .row .step {
+                grid-area: s
+            }
+
+            .row .lad {
+                grid-area: l;
+                justify-content: flex-start
+            }
+
+            .row:hover {
+                background: var(--raise)
+            }
+
+            .row.pinned {
+                background: color-mix(in srgb,var(--amber) 8%,transparent)
+            }
+
+            .row.sel {
+                background: color-mix(in srgb,var(--cyan) 13%,transparent);
+                box-shadow: inset 0 0 0 1px var(--cyan)
+            }
+
+            .row.sel .nm b {
+                color: var(--ink);
+                font-weight: 600
+            }
+
+            @media(max-width: 720px) {
+                .row {
+                    grid-template-columns:1fr 84px auto;
+                    grid-template-areas: "n s f" "b b b" "l l l"
+                }
+
+                /* Five uppercase, letter-spaced tabs need ~440px and a phone has 351px of
+     content width. flex:1 grows but never shrinks a button below its own text,
+     so the last one painted outside the viewport. Let the strip wrap and give
+     each button a floor to grow from, so two tidy rows replace one broken one. */
+            }
+
+            .nm {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                min-width: 0
+            }
+
+            .nm b {
+                font-size: 13.5px;
+                font-weight: 500;
+                color: var(--ink-2);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis
+            }
+
+            .row.hasgain .nm b,.row.pinned .nm b {
+                color: var(--ink);
+                font-weight: 600
+            }
+
+            .pin {
+                flex: 0 0 auto;
+                width: 15px;
+                height: 15px;
+                padding: 0;
+                border: 1px solid var(--line);
+                background: var(--panel);
+                color: var(--ink-3);
+                font-size: 9px;
+                line-height: 1;
+                display: grid;
+                place-items: center;
+                cursor: pointer;
+                text-transform: none;
+                letter-spacing: 0
+            }
+
+            .pin:hover {
+                color: var(--amber);
+                border-color: var(--amber)
+            }
+
+            .row.pinned .pin {
+                color: var(--amber);
+                border-color: var(--amber);
+                background: var(--sunk)
+            }
+
+            .step {
+                display: flex;
+                border: 1px solid var(--line);
+                background: var(--panel)
+            }
+
+            .step button {
+                flex: 0 0 21px;
+                border: 0;
+                background: transparent;
+                padding: 1px 0;
+                font-size: 14px;
+                line-height: 1;
+                color: var(--ink-3);
+                letter-spacing: 0
+            }
+
+            .step button:hover {
+                color: var(--amber);
+                background: var(--sunk)
+            }
+
+            .step input {
+                flex: 1;
+                width: 100%;
+                min-width: 0;
+                text-align: center;
+                border: 0;
+                background: transparent;
+                color: var(--ink);
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 13.5px;
+                font-weight: 600;
+                font-variant-numeric: tabular-nums;
+                padding: 2px 0;
+                -moz-appearance: textfield
+            }
+
+            .step input::-webkit-outer-spin-button,.step input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0
+            }
+
+            .step input:disabled {
+                color: var(--ink-3)
+            }
+
+            .bar {
+                position: relative;
+                height: 13px;
+                background: var(--sunk);
+                border: 1px solid var(--line-2);
+                cursor: ew-resize;
+                touch-action: none;
+                user-select: none
+            }
+
+            .bar:hover {
+                border-color: var(--ink-3)
+            }
+
+            .row.pinned .bar {
+                cursor: not-allowed;
+                opacity: .6
+            }
+
+            .bar .alloc {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                background: var(--amber-fill)
+            }
+
+            .bar .gain {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                background: var(--cyan-fill);
+                opacity: .62
+            }
+
+            .bar .over {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                right: 0;
+                background: repeating-linear-gradient(135deg,transparent 0 3px,var(--ink-3) 3px 4px);
+                opacity: .22
+            }
+
+            .bar i {
+                position: absolute;
+                top: -2px;
+                bottom: -2px;
+                width: 2px
+            }
+
+            .bar .tick-cap {
+                background: var(--ink-3)
+            }
+
+            .bar .tick-wall {
+                background: var(--rose)
+            }
+
+            .bar .tick-floor {
+                background: var(--amber)
+            }
+
+            .bar .tick-lock {
+                background: var(--amber);
+                box-shadow: 0 0 0 1px var(--panel)
+            }
+
+            .lad {
+                display: flex;
+                gap: 3px;
+                justify-content: flex-end;
+                align-items: center
+            }
+
+            .chip {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                font-weight: 600;
+                min-width: 29px;
+                text-align: center;
+                padding: 2px 4px;
+                border: 1px solid var(--line);
+                background: var(--sunk);
+                color: var(--ink-3)
+            }
+
+            .chip.live {
+                background: var(--panel);
+                color: var(--ink-2);
+                border-color: var(--line)
+            }
+
+            .chip.live.able {
+                cursor: pointer
+            }
+
+            .chip.live.able:hover {
+                border-color: var(--cyan);
+                color: var(--cyan)
+            }
+
+            .chip.spent {
+                background: var(--cyan-fill);
+                border-color: var(--cyan-fill);
+                color: #06231F;
+                cursor: pointer
+            }
+
+            .atcap {
+                font-size: 11px;
+                color: var(--ink-3);
+                font-style: italic
+            }
+
+            .fin {
+                text-align: right;
+                font-family: "IBM Plex Mono",monospace;
+                font-variant-numeric: tabular-nums;
+                font-size: 15px;
+                font-weight: 600;
+                white-space: nowrap
+            }
+
+            .fin .up {
+                color: var(--cyan)
+            }
+
+            .fin small {
+                display: block;
+                font-size: 10.5px;
+                font-weight: 400;
+                color: var(--ink-3);
+                line-height: 1.3
+            }
+
+            /* \002500 \002500  rail \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .rail {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                position: sticky;
+                top: 16px
+            }
+
+            @media(max-width: 1080px) {
+                .rail {
+                    position:static
+                }
+            }
+
+            .toks {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1px;
+                background: var(--line-2)
+            }
+
+            .tok {
+                background: var(--panel);
+                padding: 8px 11px;
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                gap: 8px
+            }
+
+            .tok span {
+                font-size: 11.5px;
+                color: var(--ink-2)
+            }
+
+            .tok b {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 16px;
+                font-weight: 600
+            }
+
+            .tok.zero b {
+                color: var(--ink-3)
+            }
+
+            .tok.has b {
+                color: var(--cyan)
+            }
+
+            .badges {
+                display: flex;
+                flex-direction: column;
+                max-height: 560px;
+                overflow-y: auto
+            }
+
+            .bdg {
+                display: grid;
+                grid-template-columns: 1fr auto auto;
+                gap: 8px;
+                align-items: baseline;
+                font-size: 12.5px;
+                padding: 4px 12px;
+                border-left: 3px solid transparent;
+                border-top: 1px solid var(--line-2)
+            }
+
+            .bdg:first-child {
+                border-top: 0
+            }
+
+            .bdg .bn {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                color: var(--ink-2)
+            }
+
+            .after {
+                color: var(--ink-3)
+            }
+
+            /* \002500 \002500  badge plan \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .plan-cols {
+                display: grid;
+                grid-template-columns: repeat(3,minmax(0,1fr));
+                gap: 14px;
+                padding: 14px 15px
+            }
+
+            @media(max-width: 1080px) {
+                .plan-cols {
+                    grid-template-columns:repeat(2,minmax(0,1fr))
+                }
+            }
+
+            @media(max-width: 680px) {
+                .plan-cols {
+                    grid-template-columns:1fr
+                }
+            }
+
+            .pcol[data-g="Finishing"] {
+                --acc: #3E8FD8
+            }
+
+            .pcol[data-g="Shooting"] {
+                --acc: #3AA76D
+            }
+
+            .pcol[data-g="Playmaking"] {
+                --acc: #D08A2C
+            }
+
+            .pcol[data-g="Defense"] {
+                --acc: #CE4A5C
+            }
+
+            .pcol[data-g="Rebounding"] {
+                --acc: #8A6BD1
+            }
+
+            .pcol[data-g="Physicals"] {
+                --acc: #C2A02E
+            }
+
+            .pcol {
+                --acc: var(--ink-3);
+                background: color-mix(in srgb,var(--acc) 7%,var(--panel));
+                border: 1px solid color-mix(in srgb,var(--acc) 26%,transparent);
+                border-top: 2px solid var(--acc)
+            }
+
+            .pc-head {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                gap: 8px;
+                padding: 8px 10px 5px
+            }
+
+            .pc-nm {
+                font-family: "Chakra Petch",sans-serif;
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .13em;
+                text-transform: uppercase;
+                color: var(--acc)
+            }
+
+            .pc-tk {
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--ink-2)
+            }
+
+            .pc-none {
+                margin: 0;
+                padding: 2px 10px 9px;
+                font-size: 11px;
+                color: var(--ink-3);
+                line-height: 1.45
+            }
+
+            .pbdg {
+                display: grid;
+                grid-template-columns: minmax(0,1fr) auto auto;
+                gap: 7px;
+                align-items: baseline;
+                padding: 4px 10px;
+                font-size: 12.5px;
+                border-top: 1px solid color-mix(in srgb,var(--acc) 16%,transparent)
+            }
+
+            .pb-n {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                color: var(--ink-2)
+            }
+
+            .pbdg.t3 .pb-n,.pbdg.t4 .pb-n {
+                color: var(--ink);
+                font-weight: 600
+            }
+
+            .pb-t {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 10px;
+                letter-spacing: .05em
+            }
+
+            .pbdg.t1 .pb-t {
+                color: var(--bronze)
+            }
+
+            .pbdg.t2 .pb-t {
+                color: var(--silver)
+            }
+
+            .pbdg.t3 .pb-t {
+                color: var(--gold)
+            }
+
+            .pbdg.t4 .pb-t {
+                color: var(--violet)
+            }
+
+            .pb-c {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                color: var(--ink-3);
+                min-width: 1.6em;
+                text-align: right
+            }
+
+            .fuse-wrap {
+                border-top: 1px solid var(--line)
+            }
+
+            .fuse-head {
+                padding: 11px 15px 7px;
+                font-family: "Chakra Petch",sans-serif;
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: .11em;
+                text-transform: uppercase;
+                display: flex;
+                gap: 10px;
+                align-items: baseline;
+                flex-wrap: wrap
+            }
+
+            .fuse-list {
+                display: grid;
+                grid-template-columns: repeat(2,minmax(0,1fr));
+                gap: 8px;
+                padding: 0 15px 14px
+            }
+
+            @media(max-width: 820px) {
+                .fuse-list {
+                    grid-template-columns:1fr
+                }
+            }
+
+            .fslot {
+                display: grid;
+                grid-template-columns: auto minmax(0,1fr) minmax(0,1.1fr);
+                gap: 9px;
+                align-items: center;
+                background: var(--sunk);
+                border: 1px solid var(--line);
+                padding: 7px 10px
+            }
+
+            .fs-b {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--cyan);
+                background: color-mix(in srgb,var(--cyan) 15%,transparent);
+                padding: 2px 7px
+            }
+
+            .fs-n {
+                font-size: 12.5px;
+                color: var(--ink);
+                font-weight: 600;
+                min-width: 0
+            }
+
+            .fs-n i,.fs-r i {
+                display: block;
+                font-style: normal;
+                font-size: 10.5px;
+                font-weight: 400;
+                color: var(--ink-3);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis
+            }
+
+            .fs-n i b {
+                color: var(--rose);
+                font-weight: 600
+            }
+
+            .fs-r {
+                font-size: 11.5px;
+                color: var(--ink-2);
+                min-width: 0
+            }
+
+            .fs-r.fs-none {
+                color: var(--ink-3);
+                font-style: italic
+            }
+
+            .fs-r.fs-alt {
+                color: var(--ink-3)
+            }
+
+            .impbox {
+                padding: 10px 15px 0
+            }
+
+            .impzone {
+                display: flex;
+                flex-direction: column;
+                gap: 3px;
+                padding: 11px 14px;
+                cursor: pointer;
+                border: 1px dashed var(--line);
+                background: var(--sunk);
+                font-size: 12px;
+                color: var(--ink-3);
+                line-height: 1.5
+            }
+
+            .impzone:hover,.impzone:focus-visible,.impzone.over {
+                border-color: var(--cyan);
+                color: var(--ink-2)
+            }
+
+            .impzone b {
+                color: var(--ink);
+                font-size: 12.5px
+            }
+
+            .impzone.over {
+                background: color-mix(in srgb,var(--cyan) 10%,var(--sunk))
+            }
+
+            .impmsg {
+                margin: 6px 0 0;
+                font-size: 12px;
+                line-height: 1.5;
+                color: var(--ink-2)
+            }
+
+            .impmsg:empty {
+                display: none
+            }
+
+            .impmsg b {
+                color: var(--ink)
+            }
+
+            .impmsg.ok {
+                color: var(--cyan)
+            }
+
+            .impmsg.warn {
+                color: var(--amber)
+            }
+
+            .impmsg.bad {
+                color: var(--rose)
+            }
+
+            .imppt {
+                width: 100%;
+                margin-top: 7px;
+                background: var(--sunk);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                padding: 7px;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                line-height: 1.45;
+                resize: vertical
+            }
+
+            .metanote {
+                margin: 0;
+                padding: 9px 15px 0;
+                font-size: 12px;
+                line-height: 1.5;
+                color: var(--ink-2)
+            }
+
+            .metanote b {
+                color: var(--ink)
+            }
+
+            .metanote .mtag {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 9.5px;
+                letter-spacing: .08em;
+                text-transform: uppercase;
+                padding: 1px 5px;
+                margin-right: 6px;
+                color: var(--cyan);
+                background: color-mix(in srgb,var(--cyan) 14%,transparent)
+            }
+
+            .metanote .mtag.tight {
+                color: var(--rose);
+                background: color-mix(in srgb,var(--rose) 14%,transparent)
+            }
+
+            #coach {
+                display: grid;
+                grid-template-columns: repeat(2,minmax(0,1fr));
+                gap: 0
+            }
+
+            @media(max-width: 820px) {
+                #coach {
+                    grid-template-columns:1fr
+                }
+            }
+
+            .cw {
+                padding: 11px 15px;
+                border-top: 1px solid var(--line-2);
+                font-size: 12.5px;
+                line-height: 1.55;
+                color: var(--ink-2)
+            }
+
+            .cw:nth-child(-n+2) {
+                border-top: 0
+            }
+
+            .cw h3 {
+                margin: 0 0 3px;
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: .06em;
+                font-family: "IBM Plex Sans",sans-serif;
+                text-transform: none
+            }
+
+            .cw b {
+                color: var(--ink)
+            }
+
+            .cw .tag {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 9.5px;
+                letter-spacing: .08em;
+                padding: 1px 5px;
+                margin-right: 6px;
+                vertical-align: 1px;
+                text-transform: uppercase
+            }
+
+            .cw.derived h3 {
+                color: var(--cyan)
+            }
+
+            .cw.derived .tag {
+                color: var(--cyan);
+                background: color-mix(in srgb,var(--cyan) 14%,transparent)
+            }
+
+            .cw.play h3 {
+                color: var(--amber)
+            }
+
+            .cw.play .tag {
+                color: var(--amber);
+                background: color-mix(in srgb,var(--amber) 14%,transparent)
+            }
+
+            .cw-none {
+                padding: 12px 15px;
+                font-size: 12px;
+                color: var(--ink-3)
+            }
+
+            .flexbar {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
+                padding: 11px 15px 0;
+                font-size: 11.5px;
+                color: var(--ink-2)
+            }
+
+            .flexbar input {
+                width: 62px;
+                background: var(--sunk);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                padding: 4px 7px;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 12px;
+                margin-left: 4px
+            }
+
+            .flexbar input:focus {
+                border-color: var(--cyan);
+                outline: none
+            }
+
+            .flexmode {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 10.5px;
+                color: var(--cyan);
+                background: color-mix(in srgb,var(--cyan) 13%,transparent);
+                padding: 2px 7px
+            }
+
+            .pc-flex {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                padding: 5px 10px 8px;
+                font-size: 10.5px;
+                color: var(--ink-3);
+                border-top: 1px solid var(--line-2)
+            }
+
+            .pc-flex b {
+                font-size: 12px;
+                color: var(--cyan);
+                min-width: 1.2em;
+                text-align: center
+            }
+
+            .fbtn {
+                padding: 0;
+                width: 17px;
+                height: 17px;
+                line-height: 1;
+                font-size: 12px;
+                letter-spacing: 0;
+                text-transform: none;
+                background: var(--panel);
+                color: var(--ink-3);
+                border: 1px solid var(--line)
+            }
+
+            .fbtn:hover:not(:disabled) {
+                color: var(--cyan);
+                border-color: var(--cyan)
+            }
+
+            .fbtn:disabled {
+                opacity: .3;
+                cursor: not-allowed
+            }
+
+            .unplaced {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 10.5px;
+                color: var(--ink-3);
+                background: var(--sunk);
+                padding: 2px 7px;
+                border: 1px solid var(--line)
+            }
+
+            .unplaced.has {
+                color: var(--amber);
+                border-color: color-mix(in srgb,var(--amber) 50%,transparent)
+            }
+
+            .pc-bn {
+                font-style: normal;
+                font-size: 10px;
+                color: var(--cyan);
+                margin-left: 3px
+            }
+
+            .pb-c.freed {
+                color: var(--cyan);
+                font-size: 9.5px;
+                letter-spacing: .04em
+            }
+
+            /* tier chips -- the whole plan is editable, so they have to look pressable */
+            .pb-tiers {
+                display: flex;
+                gap: 2px
+            }
+
+            .tchip {
+                padding: 1px 0;
+                width: 19px;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 10px;
+                font-weight: 600;
+                letter-spacing: 0;
+                text-transform: none;
+                line-height: 1.5;
+                background: var(--panel);
+                color: var(--ink-3);
+                border: 1px solid var(--line)
+            }
+
+            .tchip:hover:not(:disabled) {
+                color: var(--ink);
+                border-color: var(--acc)
+            }
+
+            .tchip.no,.tchip:disabled {
+                opacity: .3;
+                cursor: not-allowed
+            }
+
+            .tchip.on {
+                background: var(--acc);
+                color: #fff;
+                border-color: var(--acc)
+            }
+
+            .pbdg {
+                grid-template-columns: minmax(0,1fr) auto auto
+            }
+
+            .pbdg.off .pb-n {
+                color: var(--ink-3)
+            }
+
+            .pc-tk.over,.pc-none.over,.over {
+                color: var(--rose);
+                font-weight: 600
+            }
+
+            .synctl {
+                display: flex;
+                gap: 10px;
+                margin-left: auto;
+                align-items: center;
+                font-family: "IBM Plex Sans",sans-serif;
+                font-size: 11px;
+                font-weight: 400;
+                letter-spacing: 0;
+                text-transform: none;
+                color: var(--ink-3)
+            }
+
+            .synctl select {
+                background: var(--sunk);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                font: inherit;
+                font-size: 11px;
+                padding: 2px 4px;
+                margin-left: 3px
+            }
+
+            .fs-sel {
+                min-width: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 2px
+            }
+
+            .fs-sel select {
+                width: 100%;
+                background: var(--panel);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                font-family: "IBM Plex Sans",sans-serif;
+                font-size: 11.5px;
+                padding: 3px 5px
+            }
+
+            .fs-sel select:focus {
+                border-color: var(--cyan);
+                outline: none
+            }
+
+            .fs-sel .fs-none {
+                font-size: 10.5px;
+                color: var(--ink-3);
+                font-style: italic
+            }
+
+            .fslot {
+                grid-template-columns: auto minmax(0,1fr) minmax(0,1.15fr);
+                align-items: start
+            }
+
+            .fs-b {
+                align-self: center
+            }
+
+            .plan-caveat {
+                margin: 0;
+                padding: 10px 15px 13px;
+                font-size: 11px;
+                line-height: 1.55;
+                color: var(--ink-3);
+                border-top: 1px solid var(--line-2)
+            }
+
+            .plan-caveat b {
+                color: var(--ink-2)
+            }
+
+            .plan-caveat em {
+                font-style: italic
+            }
+
+            /* \002500 \002500  send to 2K HQ \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .qr {
+                display: flex;
+                flex-direction: column;
+                gap: 9px;
+                margin-top: 12px;
+                padding: 13px 15px;
+                background: var(--sunk);
+                border: 1px solid var(--line)
+            }
+
+            .qrbox img {
+                display: block;
+                width: 100%;
+                max-width: 252px;
+                height: auto;
+                image-rendering: pixelated;
+                background: #fff;
+                padding: 9px;
+                border: 1px solid var(--line)
+            }
+
+            .qrnote {
+                margin: 0;
+                font-size: 11.5px;
+                line-height: 1.5;
+                color: var(--ink-3)
+            }
+
+            .qrnote b {
+                color: var(--ink-2)
+            }
+
+            .qrmsg {
+                margin: 0;
+                font-size: 12px;
+                color: var(--ink-2)
+            }
+
+            .qrmsg:empty {
+                display: none
+            }
+
+            .qrmsg.ok {
+                color: var(--cyan)
+            }
+
+            .qrmsg.bad {
+                color: var(--rose)
+            }
+
+            .qracts {
+                display: flex;
+                gap: 7px;
+                flex-wrap: wrap
+            }
+
+            .qrids summary {
+                font-size: 11.5px;
+                color: var(--ink-3);
+                cursor: pointer
+            }
+
+            .qrids summary:hover {
+                color: var(--ink-2)
+            }
+
+            .qrids input {
+                width: 100%;
+                margin-top: 6px;
+                background: var(--panel);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                padding: 6px 9px;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px
+            }
+
+            /* The button is the PHONE path and the QR is the DESKTOP path -- never both,
+   or each screen gets the one that cannot work on it.
+   `.qrbox` is a plain div, so `display:none` in the media query was fighting a
+   default of `block` that the base rule never set; the split has to be stated
+   explicitly at BOTH widths rather than relying on the default. */
+            .qrbox {
+                display: block
+            }
+
+            .qrbtn {
+                display: none;
+                align-self: flex-start;
+                text-decoration: none;
+                font-family: "Chakra Petch",sans-serif;
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: .07em;
+                text-transform: uppercase;
+                padding: 10px 16px;
+                color: var(--cyan);
+                border: 1px solid var(--cyan);
+                background: color-mix(in srgb,var(--cyan) 10%,transparent)
+            }
+
+            .qrbtn:hover {
+                background: color-mix(in srgb,var(--cyan) 18%,transparent)
+            }
+
+            @media(max-width: 768px) {
+                .qrbox,.qr-desk {
+                    display:none
+                }
+
+                .qrbtn {
+                    display: inline-block
+                }
+            }
+
+            /* \002500 \002500  the phone badge sheet \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            /* Hidden outright on desktop: there the rail is already beside the board, and
+   two copies of the same list is worse than one. */
+            .asheet {
+                display: none
+            }
+
+            @media(max-width: 768px) {
+                .asheet:not([hidden]) {
+                    display:flex;
+                    flex-direction: column;
+                    position: fixed;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    z-index: 40;
+                    /* dvh, not vh. On iOS `vh` is the LARGE viewport -- the height with the
+       browser chrome hidden -- so 62vh can reach past the visible screen. The
+       sheet then runs off the bottom, its scrollable part sits where you cannot
+       see or reach it, and it reads as "not scrolling" even though the overflow
+       is set up correctly. dvh tracks the viewport you can actually see; the vh
+       line stays first as the fallback. */
+                    max-height: 62vh;
+                    max-height: 62dvh;
+                    background: var(--panel);
+                    border-top: 2px solid var(--cyan);
+                    box-shadow: 0 -10px 30px -12px rgba(0,0,0,.55);
+                }
+
+                .as-head {
+                    flex: 0 0 auto;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 10px 14px;
+                    border-bottom: 1px solid var(--line);
+                    background: var(--raise)
+                }
+
+                .as-t {
+                    flex: 1;
+                    min-width: 0;
+                    font-family: "Chakra Petch",sans-serif;
+                    font-size: 12px;
+                    font-weight: 600;
+                    letter-spacing: .11em;
+                    text-transform: uppercase;
+                    color: var(--ink)
+                }
+
+                .as-x {
+                    flex: 0 0 auto;
+                    width: 34px;
+                    height: 34px;
+                    padding: 0;
+                    font-size: 20px;
+                    line-height: 1;
+                    letter-spacing: 0;
+                    background: var(--panel);
+                    color: var(--ink-2);
+                    border: 1px solid var(--line)
+                }
+
+                .as-x:hover {
+                    color: var(--ink);
+                    border-color: var(--cyan)
+                }
+
+                /* THREE things are needed for this to scroll on its own, and the first is the
+     one that is easy to miss: a flex child defaults to min-height:auto, so it
+     refuses to shrink below its content and `overflow-y:auto` never engages --
+     the sheet just grows and gets clipped. min-height:0 lets it shrink, which
+     is what turns the overflow on.
+     overscroll-behavior:contain is the rest of the ask: without it, reaching
+     the end of this list hands the scroll to the attribute board behind, so
+     the page moves under the sheet. */
+                .as-body {
+                    flex: 1 1 auto;
+                    min-height: 0;
+                    overflow-y: auto;
+                    overscroll-behavior: contain;
+                    -webkit-overflow-scrolling: touch;
+                    touch-action: pan-y
+                }
+            }
+
+            /* IN THE SHEET, REQUIREMENT TEXT WRAPS. In the rail `.bn` is nowrap + hidden
+   and `.breq` is nowrap, which is right beside the board where the column is
+   narrow and an ellipsis is better than a three-line row. On a phone the same
+   rule CLIPPED the line -- "Three-Point 94 - ceili..." -- so the badge's actual
+   requirement, the one thing the panel exists to show, ran off the edge.
+   It also explains why the sheet would not scroll: the rows never grew tall
+   enough to overflow, because the text was being cut instead of wrapped.
+   `min-width:0` is required for the grid cell to shrink and wrap at all. */
+            .as-body .bdg {
+                align-items: start
+            }
+
+            .as-body .bn {
+                min-width: 0;
+                white-space: normal;
+                overflow: visible;
+                text-overflow: clip
+            }
+
+            .as-body .breq,.as-body .balso {
+                white-space: normal;
+                overflow-wrap: anywhere
+            }
+
+            .paste {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin-top: 12px
+            }
+
+            .paste-row {
+                display: flex;
+                gap: 8px
+            }
+
+            .paste-row input {
+                flex: 1;
+                min-width: 0;
+                background: var(--sunk);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                padding: 7px 10px;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 12px
+            }
+
+            .paste-row input:focus {
+                border-color: var(--cyan);
+                outline: none
+            }
+
+            #codeMsg.bad {
+                color: var(--rose)
+            }
+
+            #codeMsg.good {
+                color: var(--cyan)
+            }
+
+            .bcount {
+                margin: 0 0 2px;
+                padding: 0 12px;
+                font-size: 11px
+            }
+
+            /* Deliberately not named "brow": the community/builds panel in web_builds.js
+   already owns that class and asmweb.py stopped the build over it. Its
+   stylesheet is injected at runtime, so it lands after this one and wins every
+   tie -- which is why the check exists and why the builder renames, not it.
+   (Naming the clashing selector here in full would trip the same check, since
+   it scans the stylesheet text rather than parsed rules.) */
+            .bsortrow {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 8px 12px 6px
+            }
+
+            .bsortrow .bcount {
+                padding: 0;
+                margin: 0;
+                min-width: 0
+            }
+
+            .bsortrow .ab-sort {
+                flex: none
+            }
+
+            .bgrp {
+                display: grid;
+                grid-template-columns: 1fr auto auto;
+                gap: 8px;
+                align-items: baseline;
+                padding: 7px 12px 4px;
+                border-top: 1px solid var(--line);
+                margin-top: 2px;
+                position: sticky;
+                top: 0;
+                background: var(--panel)
+            }
+
+            .bgrp:first-child {
+                border-top: 0;
+                margin-top: 0
+            }
+
+            .bg-at {
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .09em;
+                text-transform: uppercase;
+                color: var(--ink-2)
+            }
+
+            .bg-v {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--cyan)
+            }
+
+            .bg-n {
+                font-size: 10.5px;
+                color: var(--ink-3)
+            }
+
+            .bdg .bneed {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                color: var(--ink-3);
+                text-align: right;
+                min-width: 2.2em
+            }
+
+            .bdg .balso {
+                display: block;
+                font-style: normal;
+                font-size: 10.5px;
+                color: var(--ink-3);
+                letter-spacing: .01em
+            }
+
+            /* the full requirement for the tier being quoted -- every leg, marked */
+            .breq {
+                display: block;
+                font-style: normal;
+                font-size: 10.5px;
+                line-height: 1.5;
+                margin-top: 1px
+            }
+
+            .breq u {
+                text-decoration: none;
+                font-family: "IBM Plex Mono",monospace
+            }
+
+            .breq s {
+                text-decoration: none;
+                color: var(--ink-3);
+                padding: 0 3px
+            }
+
+            .breq u.ok {
+                color: var(--cyan)
+            }
+
+            .breq u.no {
+                color: var(--amber)
+            }
+
+            .breq u.imp {
+                color: var(--rose)
+            }
+
+            .bdg .bt {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 10.5px;
+                letter-spacing: .05em;
+                white-space: nowrap
+            }
+
+            .bdg.t1 {
+                border-left-color: var(--bronze)
+            }
+
+            .bdg.t1 .bt {
+                color: var(--bronze)
+            }
+
+            .bdg.t2 {
+                border-left-color: var(--silver)
+            }
+
+            .bdg.t2 .bt {
+                color: var(--silver)
+            }
+
+            .bdg.t3 {
+                border-left-color: var(--gold);
+            }
+
+            .bdg.t3 .bt {
+                color: var(--gold)
+            }
+
+            .bdg.t3 .bn,.bdg.t4 .bn,.bdg.t5 .bn {
+                color: var(--ink);
+                font-weight: 600
+            }
+
+            .bdg.t4 {
+                border-left-color: var(--violet)
+            }
+
+            .bdg.t4 .bt {
+                color: var(--violet)
+            }
+
+            .bdg.t5 {
+                border-left-color: var(--rose)
+            }
+
+            .bdg.t5 .bt {
+                color: var(--rose)
+            }
+
+            .bdg.free {
+                background: color-mix(in srgb,var(--cyan) 12%,transparent)
+            }
+
+            /* a tier this body can never reach, and one you could buy next */
+            .bdg.unreach {
+                opacity: .5
+            }
+
+            .bdg.unreach .bt {
+                color: var(--ink-3)
+            }
+
+            .bdg.want .bt {
+                color: var(--cyan)
+            }
+
+            .bdg.want .bn {
+                color: var(--ink-2)
+            }
+
+            .row .fin {
+                font-size: 13px
+            }
+
+            .nxt {
+                display: flex;
+                flex-direction: column;
+                max-height: 240px;
+                overflow-y: auto
+            }
+
+            .nxt div {
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+                gap: 8px;
+                align-items: baseline;
+                font-size: 12px;
+                padding: 4px 12px;
+                border-top: 1px solid var(--line-2)
+            }
+
+            .nxt div:first-child {
+                border-top: 0
+            }
+
+            .nxt .n-at {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                color: var(--cyan);
+                font-weight: 600
+            }
+
+            .nxt .n-bn {
+                color: var(--ink-2);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap
+            }
+
+            .nxt .n-gap {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                color: var(--ink-3)
+            }
+
+            /* \002500 \002500  shades of \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .shades-top {
+                display: flex;
+                flex-direction: column
+            }
+
+            .shade {
+                display: grid;
+                grid-template-columns: auto minmax(0,1fr) auto;
+                gap: 3px 9px;
+                align-items: baseline;
+                padding: 7px 12px;
+                border-top: 1px solid var(--line-2);
+                cursor: pointer
+            }
+
+            .shade:hover {
+                background: var(--raise)
+            }
+
+            .sh-row {
+                cursor: pointer
+            }
+
+            .sh-row:hover {
+                background: var(--raise)
+            }
+
+            .shade:first-child {
+                border-top: 0
+            }
+
+            .shade.lead {
+                background: color-mix(in srgb,var(--violet) 12%,transparent)
+            }
+
+            .sh-rk {
+                grid-row: span 2;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 16px;
+                font-weight: 600;
+                color: var(--ink-3);
+                align-self: center
+            }
+
+            .shade.lead .sh-rk {
+                color: var(--violet)
+            }
+
+            .sh-nm {
+                font-size: 13.5px;
+                font-weight: 600;
+                color: var(--ink);
+                min-width: 0
+            }
+
+            .sh-nm i {
+                font-style: normal;
+                font-size: 10px;
+                color: var(--ink-3);
+                font-family: "IBM Plex Mono",monospace;
+                letter-spacing: .04em;
+                margin-left: 4px
+            }
+
+            .sh-meta {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                color: var(--ink-3);
+                text-align: right
+            }
+
+            .sh-cl {
+                grid-column: 2/4;
+                font-size: 11px;
+                color: var(--violet)
+            }
+
+            .sh-empty {
+                margin: 0;
+                padding: 11px 12px;
+                font-size: 12px;
+                color: var(--ink-3)
+            }
+
+            .sh-note {
+                margin: 0;
+                padding: 9px 12px;
+                font-size: 11.5px;
+                line-height: 1.5;
+                color: var(--ink-3)
+            }
+
+            .sh-note b {
+                color: var(--ink-2)
+            }
+
+            .sh-ctl {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                flex-wrap: wrap;
+                padding: 9px 12px;
+                border-top: 1px solid var(--line);
+                font-size: 11.5px;
+                color: var(--ink-2)
+            }
+
+            .sh-ctl select {
+                background: var(--sunk);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                font: inherit;
+                font-size: 12px;
+                padding: 3px 6px
+            }
+
+            .sh-ctl label {
+                display: inline-flex;
+                gap: 5px;
+                align-items: center;
+                cursor: pointer
+            }
+
+            .shades-list {
+                display: flex;
+                flex-direction: column;
+                max-height: 280px;
+                overflow-y: auto
+            }
+
+            .sh-row {
+                display: grid;
+                grid-template-columns: minmax(0,1fr) auto auto auto;
+                gap: 9px;
+                align-items: baseline;
+                padding: 4px 12px;
+                font-size: 12.5px;
+                border-top: 1px solid var(--line-2)
+            }
+
+            .sh-row:first-child {
+                border-top: 0
+            }
+
+            .sh-row.hist {
+                opacity: .72
+            }
+
+            .sh-row-nm {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                color: var(--ink-2)
+            }
+
+            .sh-row.hist .sh-row-nm::after {
+                content: ' \00b7 throwback';
+                color: var(--ink-3);
+                font-size: 10px
+            }
+
+            .sh-row-h {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                color: var(--ink-3)
+            }
+
+            .sh-row-o {
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--ink-2)
+            }
+
+            .sh-row-c {
+                font-size: 10.5px;
+                color: var(--ink-3);
+                min-width: 4.6em;
+                text-align: right
+            }
+
+            /* the target set: up to three picked players, then one Find */
+            .sh-set {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                flex-wrap: wrap;
+                padding: 9px 12px;
+                border-bottom: 1px solid var(--line);
+                background: color-mix(in srgb,var(--violet) 8%,transparent)
+            }
+
+            .sh-set-lbl {
+                font-size: 11.5px;
+                color: var(--ink-2)
+            }
+
+            .sh-set-names {
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap;
+                min-width: 0
+            }
+
+            .sh-set-names b {
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--ink);
+                background: var(--raise);
+                border: 1px solid var(--line);
+                padding: 2px 8px;
+                border-radius: 999px
+            }
+
+            .sh-set-names b.hist {
+                color: var(--ink-2)
+            }
+
+            .sh-set-go {
+                margin-left: auto;
+                font: inherit;
+                font-size: 12px;
+                font-weight: 600;
+                padding: 4px 11px;
+                background: var(--violet);
+                color: #fff;
+                border: 0;
+                cursor: pointer
+            }
+
+            .sh-set-go:hover {
+                filter: brightness(1.08)
+            }
+
+            .sh-set-hint {
+                margin: 0;
+                padding: 8px 12px;
+                font-size: 11.5px;
+                line-height: 1.5;
+                color: var(--ink-3);
+                border-bottom: 1px solid var(--line-2)
+            }
+
+            .sh-set-clr {
+                font: inherit;
+                font-size: 11.5px;
+                color: var(--ink-3);
+                background: none;
+                border: 0;
+                cursor: pointer;
+                text-decoration: underline
+            }
+
+            .shade.on,.sh-row.on {
+                box-shadow: inset 3px 0 0 var(--violet)
+            }
+
+            .sh-caveat {
+                margin: 0;
+                padding: 8px 12px;
+                font-size: 10.5px;
+                line-height: 1.5;
+                color: var(--ink-3);
+                border-top: 1px solid var(--line-2)
+            }
+
+            /* \002500 \002500  views \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .tabs {
+                display: flex;
+                gap: 2px;
+                background: var(--panel);
+                border: 1px solid var(--line);
+                box-shadow: var(--shadow);
+                padding: 4px
+            }
+
+            .tabs button {
+                flex: 1;
+                background: transparent;
+                border: 0;
+                padding: 10px 12px;
+                font-family: "Chakra Petch",sans-serif;
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: .09em;
+                text-transform: uppercase;
+                color: var(--ink-3);
+                cursor: pointer
+            }
+
+            .tabs button:hover {
+                color: var(--ink-2)
+            }
+
+            .tabs button.on {
+                background: var(--sunk);
+                color: var(--cyan);
+                box-shadow: inset 0 -2px 0 var(--cyan)
+            }
+
+            /* PHONE TABS -- and this block MUST sit after the .tabs rules above.
+   A media query adds no specificity, so the same override written in the
+   earlier @media block at the top of this sheet lost the cascade to
+   `.tabs button{flex:1}` below it and silently did nothing. The measurement
+   said the buttons were still 67px while the source said otherwise.
+
+   flex-shrink must be 0. At 1 the five boxes squeezed to 67px each and fitted
+   on one row -- but a button cannot squeeze its TEXT, so "Animations" painted
+   25px outside its own box and past the viewport, which is the horizontal
+   scroll the user reported. The box fitting is not the test; the text fitting
+   is. A one-third basis that cannot shrink gives three per row, then two, each
+   grown to fill. */
+            @media(max-width: 720px) {
+                .tabs {
+                    flex-wrap:wrap
+                }
+
+                .tabs button {
+                    flex: 1 0 calc(33.333% - 6px);
+                    min-width: 0;
+                    padding: 9px 4px;
+                    font-size: 10.5px;
+                    letter-spacing: .04em
+                }
+            }
+
+            .picked {
+                margin: 0;
+                padding: 10px 14px;
+                font-size: 12.5px;
+                line-height: 1.5;
+                color: var(--ink-2);
+                background: color-mix(in srgb,var(--cyan) 11%,transparent);
+                border: 1px solid color-mix(in srgb,var(--cyan) 34%,transparent)
+            }
+
+            .picked b {
+                color: var(--ink)
+            }
+
+            .picked .pk-x {
+                float: right;
+                cursor: pointer;
+                color: var(--ink-3);
+                padding-left: 12px;
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px
+            }
+
+            .picked .pk-x:hover {
+                color: var(--ink)
+            }
+
+            /* \002500 \002500  build name directory \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .nm-ctl {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                padding: 11px 15px;
+                border-bottom: 1px solid var(--line-2)
+            }
+
+            .nm-ctl input[type=search] {
+                flex: 1;
+                min-width: 180px;
+                background: var(--sunk);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                padding: 7px 10px;
+                font: inherit;
+                font-size: 14px
+            }
+
+            .nm-ctl input[type=search]:focus {
+                border-color: var(--cyan);
+                outline: none
+            }
+
+            .nm-ctl select {
+                background: var(--raise);
+                color: var(--ink);
+                border: 1px solid var(--line);
+                padding: 6px 8px;
+                font: inherit;
+                font-size: 13px
+            }
+
+            /* min-height:0 so the flex column can actually shrink and scroll, and
+   overscroll-behavior so a swipe that reaches the end of the list does not
+   hand the scroll to the page behind it. On a phone the list gets most of the
+   screen -- 430px of a 220-row list is a keyhole. */
+            .nm-list {
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+                max-height: 430px;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-y
+            }
+
+            @media(max-width: 768px) {
+                .nm-list {
+                    max-height:68vh
+                }
+            }
+
+            .nm-row {
+                display: grid;
+                grid-template-columns: minmax(0,1fr) auto auto auto;
+                gap: 10px;
+                align-items: baseline;
+                padding: 6px 15px;
+                border-top: 1px solid var(--line-2);
+                cursor: pointer
+            }
+
+            .nm-row:first-child {
+                border-top: 0
+            }
+
+            .nm-row:hover {
+                background: var(--raise)
+            }
+
+            .nm-row.mine {
+                background: color-mix(in srgb,var(--amber) 12%,transparent)
+            }
+
+            .nm-row.sel {
+                background: color-mix(in srgb,var(--cyan) 13%,transparent);
+                box-shadow: inset 0 0 0 1px var(--cyan)
+            }
+
+            .nm-n {
+                font-size: 13px;
+                color: var(--ink);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap
+            }
+
+            .nm-n i {
+                font-style: normal;
+                font-size: 10px;
+                color: var(--amber);
+                font-family: "IBM Plex Mono",monospace;
+                letter-spacing: .04em
+            }
+
+            .nm-g {
+                font-size: 11px;
+                color: var(--ink-3)
+            }
+
+            /* cap-breaker rows: a bar makes the spread between heights readable at a
+   glance, which is the entire point of the view */
+            .pk-row {
+                display: grid;
+                grid-template-columns: 34px 52px minmax(0,1fr) 96px 58px;
+                gap: 10px;
+                align-items: center;
+                padding: 7px 15px;
+                border-top: 1px solid var(--line-2);
+                cursor: pointer
+            }
+
+            .pk-row:first-child {
+                border-top: 0
+            }
+
+            .pk-row:hover {
+                background: var(--raise)
+            }
+
+            .pk-p {
+                font-size: 11px;
+                color: var(--ink-3);
+                font-family: "IBM Plex Mono",monospace
+            }
+
+            .pk-h {
+                font-size: 13px;
+                color: var(--ink)
+            }
+
+            .pk-bar {
+                height: 8px;
+                background: var(--sunk);
+                border-radius: 4px;
+                overflow: hidden
+            }
+
+            .pk-bar i {
+                display: block;
+                height: 100%;
+                background: var(--cyan)
+            }
+
+            .pk-v {
+                font-size: 11px;
+                color: var(--ink-2);
+                font-family: "IBM Plex Mono",monospace;
+                white-space: nowrap
+            }
+
+            .pk-f {
+                font-size: 12px;
+                color: var(--amber);
+                font-family: "IBM Plex Mono",monospace;
+                text-align: right;
+                white-space: nowrap
+            }
+
+            .pk-note {
+                margin: 0;
+                padding: 9px 15px;
+                font-size: 12px;
+                color: var(--ink-2);
+                background: color-mix(in srgb,var(--amber) 10%,transparent);
+                border-top: 1px solid var(--line-2);
+                border-bottom: 1px solid var(--line-2)
+            }
+
+            @media(max-width: 560px) {
+                .pk-row {
+                    grid-template-columns:30px 46px minmax(0,1fr) 54px
+                }
+
+                .pk-bar {
+                    display: none
+                }
+            }
+
+            .nm-p {
+                font-size: 10.5px;
+                color: var(--ink-3);
+                letter-spacing: .06em
+            }
+
+            .nm-t {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 9.5px;
+                letter-spacing: .07em;
+                text-transform: uppercase;
+                padding: 1px 6px;
+                min-width: 5.4em;
+                text-align: center
+            }
+
+            .nm-t.t-ultra {
+                color: #fff;
+                background: var(--rose)
+            }
+
+            .nm-t.t-rare {
+                color: var(--violet);
+                background: color-mix(in srgb,var(--violet) 20%,transparent)
+            }
+
+            .nm-t.t-uncommon {
+                color: var(--cyan);
+                background: color-mix(in srgb,var(--cyan) 16%,transparent)
+            }
+
+            .nm-t.t-common {
+                color: var(--ink-2);
+                background: var(--sunk)
+            }
+
+            .nm-t.t-everyday {
+                color: var(--ink-3);
+                background: var(--sunk)
+            }
+
+            .nm-detail {
+                padding: 11px 15px;
+                border-bottom: 1px solid var(--line-2);
+                background: var(--raise);
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                align-items: flex-start
+            }
+
+            .nm-d-n {
+                font-size: 15px;
+                font-weight: 600
+            }
+
+            .nm-d-p {
+                margin: 0;
+                font-size: 12.5px;
+                color: var(--ink-2);
+                line-height: 1.5
+            }
+
+            .nm-d-ok {
+                margin: 0;
+                font-size: 12px;
+                color: var(--cyan)
+            }
+
+            .nm-d-no {
+                margin: 0;
+                font-size: 12px;
+                color: var(--ink-3);
+                line-height: 1.5
+            }
+
+            .nm-empty {
+                margin: 0;
+                padding: 14px 15px;
+                font-size: 12.5px;
+                color: var(--ink-3)
+            }
+
+            .nm-foot {
+                margin: 0;
+                padding: 9px 15px 12px;
+                font-size: 11px;
+                line-height: 1.5;
+                color: var(--ink-3);
+                border-top: 1px solid var(--line-2)
+            }
+
+            .optmsg {
+                flex-basis: 100%;
+                font-family: "IBM Plex Sans",sans-serif;
+                font-size: 12px;
+                font-weight: 400;
+                letter-spacing: 0;
+                text-transform: none;
+                color: var(--ink-2);
+                line-height: 1.5
+            }
+
+            .optmsg:empty {
+                display: none
+            }
+
+            .optmsg b {
+                color: var(--ink)
+            }
+
+            /* \002500 \002500  prompt bar \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            #prompt {
+                position: sticky;
+                bottom: 0;
+                z-index: 30;
+                display: none;
+                gap: 10px;
+                align-items: center;
+                background: var(--panel);
+                border: 1px solid var(--amber);
+                padding: 10px 14px;
+                font-size: 13px;
+                color: var(--ink-2);
+                box-shadow: var(--shadow)
+            }
+
+            #prompt.on {
+                display: flex
+            }
+
+            #prompt .txt {
+                flex: 1;
+                min-width: 0
+            }
+
+            #prompt strong {
+                color: var(--ink)
+            }
+
+            /* \002500 \002500  output \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500 \002500  */
+            .out {
+                display: flex;
+                flex-direction: column;
+                gap: 10px
+            }
+
+            #cardWrap {
+                overflow-x: auto
+            }
+
+            #cardWrap img.cardimg {
+                display: block;
+                max-width: 100%;
+                height: auto;
+                border: 1px solid var(--line)
+            }
+
+            .cardtip {
+                margin: 0;
+                font-size: 11.5px;
+                color: var(--ink-3)
+            }
+
+            .cardtip b {
+                color: var(--ink-2);
+                font-weight: 600
+            }
+
+            .code {
+                font-family: "IBM Plex Mono",monospace;
+                font-size: 11px;
+                color: var(--ink-3);
+                word-break: break-all;
+                background: var(--sunk);
+                border: 1px solid var(--line-2);
+                padding: 8px 11px
+            }
+
+            footer {
+                font-size: 12px;
+                color: var(--ink-3);
+                border-top: 1px solid var(--line);
+                padding-top: 14px;
+                max-width: 78ch
+            }
+
+            footer b {
+                color: var(--ink-2);
+                font-weight: 600
+            }
+
+            /* The affiliation notice sits on its own line and is the one part of the footer
+   that has to be read, so it gets the rule above it rather than running on. */
+            footer .disc-l {
+                display: block;
+                margin-top: 9px;
+                padding-top: 9px;
+                border-top: 1px solid var(--line-2)
+            }
+
+            footer .thanks {
+                display: block;
+                margin-top: 9px
+            }
+
+            footer .thanks b {
+                color: var(--amber);
+                font-weight: 600
+            }
+
+            footer #legalLinks:not(:empty) {
+                display: block;
+                margin-top: 9px
+            }
+
+            footer #legalLinks a {
+                color: var(--ink-2)
+            }
+
+            footer #legalLinks a:hover {
+                color: var(--cyan)
+            }

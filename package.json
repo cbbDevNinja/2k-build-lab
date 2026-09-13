@@ -1,0 +1,21 @@
+{
+  "name": "goated-build-lab",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "api:dev": "node --watch server/src/index.js",
+    "api:start": "node server/src/index.js",
+    "invite:make": "node server/scripts/make-invite-code.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.1",
+    "helmet": "^8.0.0",
+    "zod": "^3.23.8"
+  }
+}

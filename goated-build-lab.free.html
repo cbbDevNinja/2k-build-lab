@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <meta name="description" content="NBA 2K27 build lab: exact attribute ceilings, cap breaker ladders, badge requirements and archetype names, read out of the game's own tuning tables.">
+        <meta name="theme-color" content="#0e1116">
+        <meta property="og:title" content="Goated Build Lab">
+        <meta property="og:description" content="Exact 2K27 ceilings, cap breaker ladders and badge plans -- from the game's own tables, not fitted.">
+        <meta property="og:type" content="website">
+        <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%90%3C/text%3E%3C/svg%3E">
+        <!-- INSTALLABLE AS AN APP. Web build only: the artifact has no origin of its
+     own to scope a manifest or a service worker to. iOS ignores the manifest
+     for home-screen launches and reads its own three metas instead, so both
+     sets are needed -- shipping only the manifest gets an Android app and a
+     Safari bookmark. -->
+        <link rel="manifest" href="/manifest.webmanifest">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="Build Lab">
+        <meta name="mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="./css/goated-build-lab.reset.css">
+        <!-- Vercel Web Analytics. WEB ONLY, which is why it lives here and not in
+     ui_shell.html: the artifact is not served by Vercel, so /_vercel/insights/
+     would 404 there. Cookieless and no personal data -- it counts page views,
+     referrers and countries, nothing that identifies a visitor. -->
+        <script defer src="/_vercel/insights/script.js"></script>
+        <!-- Registered on load, never before it: the worker is a progressive
+     enhancement and must not compete with the page for the first paint. The
+     whole builder is already in the document by then. -->
+        <script src="./js/goated-build-lab.bootstrap.js"></script>
+    </head>
+    <body>
+        <title>Goated Build Lab</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+        <!-- QR rendering only. cdnjs is on the artifact CSP allowlist; if it is blocked
+     the link and Copy link still work, so the feature degrades rather than breaks. -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<link rel="stylesheet" href="./css/goated-build-lab.free.css">
+        <div class="wrap">
+            <header class="ident">
+                <div>
+                    <p class="eyebrow">NBA 2K27 &#xb7; read from the game's own tables</p>
+                    <h1 class="arch" id="archName">Goated Build Lab</h1>
+                    <p class="arch-after" id="archAfter" hidden></p>
+                    <p class="body-line" id="bodyLine"></p>
+                    <p class="shade-line" id="shadeLine" hidden></p>
+                </div>
+                <div class="gauge">
+                    <div class="ovr-row">
+                        <button type="button" class="theme" id="theme" title="Theme: following your system" aria-live="polite">
+                            <span class="t-ico" aria-hidden="true">&#x25d0;</span>
+                            <span class="t-txt">Auto</span>
+                        </button>
+                        <span class="ovr mono" id="ovr">25</span>
+                        <span class="ovr-lbl">Overall</span>
+                    </div>
+                </div>
+            </header>
+            <nav class="tabs" id="tabs" role="tablist" aria-label="Views">
+                <button type="button" data-t="build" class="on" role="tab" aria-selected="true">Builder</button>
+                <button type="button" data-t="names" role="tab" aria-selected="false">Build names</button>
+                <button type="button" data-t="shades" role="tab" aria-selected="false">Shades</button>
+                <button type="button" data-t="parks" role="tab" aria-selected="false">Cap breakers</button>
+                <button type="button" data-t="anims" role="tab" aria-selected="false">Animations</button>
+                <button type="button" data-t="badges" role="tab" aria-selected="false">Badge builder</button>
+            </nav>
+            <p class="picked" id="picked" hidden></p>
+            <section class="finder" aria-label="Find a build">
+                <div class="fbar">
+                    <div class="fgrp">
+                        <label class="lbl" for="fPos">Position</label>
+                        <select id="fPos">
+                            <option value="0">Point Guard</option>
+                            <option value="1" selected>Shooting Guard</option>
+                            <option value="2">Small Forward</option>
+                            <option value="3">Power Forward</option>
+                            <option value="4">Center</option>
+                        </select>
+                    </div>
+                    <div class="fgrp" style="min-width:230px">
+                        <label class="lbl" for="fMeta">Start from a known build</label>
+                        <select id="fMeta"></select>
+                    </div>
+                    <div class="fgrp">
+                        <label class="lbl" for="fHt">Height</label>
+                        <select id="fHt"></select>
+                    </div>
+                    <div class="fgrp">
+                        <label class="lbl" for="fCaps">Cap breakers</label>
+                        <select id="fCaps">
+                            <option value="auto" selected>auto &mdash; tell me what it needs</option>
+                            <option>0</option>
+                            <option>3</option>
+                            <option>5</option>
+                            <option>7</option>
+                            <option>10</option>
+                            <option>15</option>
+                        </select>
+                    </div>
+                    <p class="metanote" id="metaNote" hidden></p>
+                    <div class="impbox" id="impBox" hidden>
+                        <div class="impzone" id="impZone" tabindex="0" title="Paste, drop, or click to choose a screenshot">
+                            <b>Have a screenshot?</b>
+                            <span>Paste it anywhere on this page, drop it here, or tap to pick one:
+          the 2K HQ app build page, a 2K Card, or the in-game Attribute Editor.
+          It is read right here on your device and the picture is never saved.
+          Every number is checked against the body &#x2019;s ceilings before anything moves.</span>
+                        </div>
+                        <input type="file" id="impFile" accept="image/*" hidden>
+                        <p class="impmsg" id="impMsg"></p>
+                    </div>
+                    <div class="fgrp" style="flex:1;min-width:260px">
+                        <span class="lbl lbl-long">Click once: good (75 &ndash;90) &middot; twice: excel (90+) &middot; unticked only gets leftovers &middot; Post &amp; Strength only when ticked</span>
+                        <div class="cats" id="cats"></div>
+                    </div>
+                    <div class="fgrp">
+                        <span class="lbl">Must reach</span>
+                        <div class="floors" id="floors"></div>
+                        <button type="button" class="addfloor" id="addFloor">+ another number</button>
+                        <p class="bounds" id="floorNote"></p>
+                    </div>
+                    <div class="fgrp">
+                        <span class="lbl">&nbsp;</span>
+                        <button type="button" id="goTick" class="go">Find builds</button>
+                    </div>
+                </div>
+                <!-- The plain-English brief bar lived here. REMOVED: it ran on
+         window.claude, which exists only inside a Claude artifact, so it is
+         dead code on a real site. The tick boxes above produce the same spec
+         and cost nothing. The parser (ASK_PROMPT, floorsFromText, normSpec) is
+         kept in ui_agent.js -- it is still the right entry point if a server
+         side parse is ever wanted. -->
+                <div class="results" id="results">
+                    <div class="rhead">
+                        <p class="brief-note" id="askNote">
+                            Pick what it should be good at, then
+          <b>Find builds</b>
+                            . Nothing here costs anything.
+                        </p>
+                        <div class="sortby" id="sortby" hidden>
+                            <button type="button" data-s="value" class="on">Best overall</button>
+                            <button type="button" data-s="gain">Most free points</button>
+                        </div>
+                    </div>
+                    <div class="alts" id="alts"></div>
+                </div>
+            </section>
+            <section class="frame" aria-label="Body">
+                <div class="fcell">
+                    <div class="fhead">
+                        <label class="lbl" for="pos">Position</label>
+                    </div>
+                    <select id="pos">
+                        <option value="0">Point Guard</option>
+                        <option value="1">Shooting Guard</option>
+                        <option value="2" selected>Small Forward</option>
+                        <option value="3">Power Forward</option>
+                        <option value="4">Center</option>
+                    </select>
+                </div>
+                <div class="fcell">
+                    <div class="fhead">
+                        <label class="lbl" for="h">Height</label>
+                        <output class="fval" id="hOut">6 &#x2032;6 &#x2033;</output>
+                    </div>
+                    <input type="range" id="h" min="76" max="82" value="78">
+                    <p class="bounds" id="hB"></p>
+                </div>
+                <div class="fcell">
+                    <div class="fhead">
+                        <label class="lbl" for="w">Weight</label>
+                        <output class="fval" id="wOut">210</output>
+                    </div>
+                    <input type="range" id="w" min="180" max="265" value="210">
+                    <p class="bounds" id="wB"></p>
+                </div>
+                <div class="fcell">
+                    <div class="fhead">
+                        <label class="lbl" for="ws">Wingspan</label>
+                        <output class="fval" id="wsOut">6 &#x2032;8 &#x2033;</output>
+                    </div>
+                    <input type="range" id="ws" min="78" max="84" value="80">
+                    <p class="bounds" id="wsB"></p>
+                </div>
+                <div class="acts">
+                    <button type="button" id="fill99" class="go" title="Buy the cheapest point until nothing more fits under 99">Fill to 99</button>
+                    <button type="button" id="reset">Reset</button>
+                    <button type="button" id="clearbrk">Clear breakers</button>
+                    <button type="button" id="optimize" class="go" title="Improve a build you already made, without changing what it is">Optimize this build</button>
+                    <label class="keepname" title="Refuse any point that would rename the build">
+                        <input type="checkbox" id="keepName">Keep my build name
+      
+                    </label>
+                    <span class="optmsg" id="optMsg"></span>
+                </div>
+            </section>
+            <div class="work">
+                <section class="sheet" aria-label="Attributes">
+                    <div class="sheet-head">
+                        <h2>Attributes</h2>
+                        <div class="hrow">
+                            <button type="button" id="undo" disabled title="Nothing to undo">&#8630; Undo</button>
+                            <button type="button" id="redo" disabled title="Nothing to redo">Redo &#8631;</button>
+                        </div>
+                        <span class="hint" id="sheetHint"></span>
+                    </div>
+                    <p class="cascade" id="cascade" hidden></p>
+                    <div id="attrs"></div>
+                    <div class="potential">
+                        <span class="pot-lbl">Overall Potential</span>
+                        <div class="wall">
+                            <div class="wall-track">
+                                <span class="wall-fill" id="wallFill"></span>
+                                <i class="wall-zone"></i>
+                            </div>
+                            <div class="wall-txt">
+                                <span>
+                                    raw <b id="rawVal">25.0000</b>
+                                </span>
+                                <span id="wallNote">wall 99.0000</span>
+                            </div>
+                        </div>
+                        <span class="pot-num mono" id="ovr2">25</span>
+                    </div>
+                </section>
+                <!-- THE GAP UNDER THE BOARD. `.work` is `minmax(0,1fr) 318px` with
+         align-items:start, so whenever the rail outruns the attribute board
+         the bottom of the left column is empty -- ~500px of black on a
+         finished build. This sits at grid-column 1 and fills it.
+
+         Animations are the right thing to put there: the rail beside it
+         already says what the build's BADGES earn, and this is the other half
+         of the same question, read off the same numbers. Free tier on
+         purpose -- the full 2,494-row Animations tab is Premium, this is the
+         part of it that belongs next to the sliders. -->
+                <section class="sheet animbox" id="animBox" aria-label="Animations">
+                    <div class="sheet-head">
+                        <h2>Animations</h2>
+                        <span class="hint" id="abCount"></span>
+                    </div>
+                    <div class="ab-ctl" id="abCtl"></div>
+                    <div class="ab-cats" id="abCats"></div>
+                    <div class="ab-near" id="abNear"></div>
+                    <p class="ab-foot" id="abFoot"></p>
+                </section>
+                <aside class="rail">
+                    <section class="sheet">
+                        <div class="sheet-head">
+                            <h2>Badge tokens</h2>
+                            <span class="hint" id="tokTotal"></span>
+                        </div>
+                        <div class="toks" id="toks"></div>
+                    </section>
+                    <section class="sheet">
+                        <div class="sheet-head">
+                            <h2>Badges</h2>
+                            <div class="sortby" id="bview">
+                                <button type="button" class="on" data-g="attr">by attribute</button>
+                                <button type="button" data-g="tier">by tier</button>
+                            </div>
+                        </div>
+                        <div class="bsortrow">
+                            <p class="hint bcount" id="bCount"></p>
+                            <select class="ab-sort" id="bSort" aria-label="Sort badges"></select>
+                        </div>
+                        <div class="badges" id="badgeList"></div>
+                    </section>
+                    <section class="sheet">
+                        <div class="sheet-head">
+                            <h2>Next threshold</h2>
+                            <span class="hint">nearest unearned</span>
+                        </div>
+                        <div class="nxt" id="nextList"></div>
+                    </section>
+                    <section class="sheet" id="shadesSheet">
+                        <div class="sheet-head">
+                            <h2>Shades of</h2>
+                            <span class="hint">who this build plays like</span>
+                        </div>
+                        <div class="sh-set" id="shSet" hidden>
+                            <span class="sh-set-lbl">Build a shade of</span>
+                            <span class="sh-set-names" id="shSetNames"></span>
+                            <button type="button" id="shSetGo" class="sh-set-go">Find builds</button>
+                            <button type="button" id="shSetClear" class="sh-set-clr">clear</button>
+                        </div>
+                        <p class="sh-set-hint" id="shSetHint">Pick up to three players below and the
+          builder searches for a build that reads as all of them.</p>
+                        <div class="shades-top" id="shadesTop"></div>
+                        <p class="sh-note">The same three the game names, from its own
+          comparison routine and roster &mdash; matched against the in &#8209;game
+          screen. Browse the whole pool below.</p>
+                        <div class="sh-ctl">
+                            <select id="shPos" aria-label="Browse a position">
+                                <option value="0">Point Guards</option>
+                                <option value="1">Shooting Guards</option>
+                                <option value="2">Small Forwards</option>
+                                <option value="3">Power Forwards</option>
+                                <option value="4">Centers</option>
+                            </select>
+                            <label>
+                                <input type="checkbox" id="shHist">throwbacks
+                            </label>
+                            <span class="hint" id="shadesCount" style="margin-left:auto"></span>
+                        </div>
+                        <div class="shades-list" id="shadesList"></div>
+                    </section>
+                </aside>
+            </div>
+            <!-- PHONE ONLY. The badge panel lives in the rail, which stacks BELOW the
+       whole attribute board on a narrow screen -- so tapping an attribute
+       filtered something you could not see without scrolling past 21 rows.
+       Same content, brought to where the tap happened. -->
+            <div class="asheet" id="attrSheet" hidden>
+                <div class="as-head">
+                    <span class="as-t" id="attrSheetTitle"></span>
+                    <button type="button" class="as-x" id="attrSheetX" aria-label="Close">&times;</button>
+                </div>
+                <div class="as-body" id="attrSheetBody"></div>
+            </div>
+            <section class="out" aria-label="Save & share">
+                <div class="acts" style="padding:0">
+                    <button type="button" id="mkcard" class="go">Build card</button>
+                    <button type="button" id="copycard">Copy image</button>
+                    <button type="button" id="savecard" hidden>Save PNG</button>
+                    <button type="button" id="copycode">Copy code</button>
+                    <button type="button" id="qrGo" class="go">Send to 2K HQ</button>
+                </div>
+                <!-- The link is the mechanism: the phone opens 2K HQ because nba.2k.com is
+         an associated domain. So the QR always carries a URL; only the
+         PRESENTATION changes. On a desktop you scan the code with your phone
+         (you cannot scan the screen you are holding); on a phone the app cannot
+         read the photo album, so it has to be a tap. -->
+                <div class="qr" id="qrWrap" hidden>
+                    <div class="qrbox" id="qrBox"></div>
+                    <p class="qrnote qr-desk">
+                        Scan this with your phone &mdash;it opens the
+        build in <b>NBA 2K HQ</b>
+                        .
+                    </p>
+                    <a class="qrbtn" id="qrOpen" href="#" rel="noopener">Open in NBA 2K HQ</a>
+                    <div class="qracts">
+                        <button type="button" id="qrCopy">Copy link</button>
+                    </div>
+                    <details class="qrids">
+                        <summary>Not importing to your account?</summary>
+                        <p class="qrnote">
+                            The link carries two ID fields that came from the
+          account this was built with. If the import lands on the wrong account
+          &mdash;or fails &mdash;open <b>2K HQ</b>
+                            , share any build of your
+          own, and paste that link here once. Your IDs are read from it and kept
+          on this device only.
+                        </p>
+                        <input id="qrIds" type="text" spellcheck="false" autocomplete="off" placeholder="paste a 2K HQ build link">
+                    </details>
+                    <p class="qrmsg" id="qrMsg"></p>
+                </div>
+                <div class="paste">
+                    <label class="lbl" for="codeIn">Paste a build code</label>
+                    <div class="paste-row">
+                        <input id="codeIn" type="text" spellcheck="false" autocomplete="off" placeholder="p=1&amp;h=78&amp;w=232&amp;s=82&amp;v=77.55.75.&#x2026;">
+                        <button type="button" class="go" id="loadcode">Load</button>
+                    </div>
+                    <p class="bounds" id="codeMsg"></p>
+                </div>
+                <div id="cardWrap" hidden></div>
+                <p class="code" id="codeOut"></p>
+            </section>
+            <div id="prompt" role="status" aria-live="polite">
+                <span class="txt" id="promptTxt"></span>
+                <button type="button" id="pKeep">Keep</button>
+                <button type="button" class="go" id="pGo">Unlock</button>
+            </div>
+            <section class="sheet" aria-label="Read on this build">
+                <div class="sheet-head">
+                    <h2>Read on this build</h2>
+                    <span class="hint">why the numbers are where they are</span>
+                </div>
+                <div id="coach"></div>
+            </section>
+            <section class="sheet plan" aria-label="Badge plan">
+                <div class="sheet-head">
+                    <h2>Badge plan</h2>
+                    <div class="sortby" id="planAuto">
+                        <button type="button" class="on" data-m="auto" title="The solver owns the plan and follows the build">auto</button>
+                        <button type="button" data-m="manual" title="Your plan &#x2014; edits change only what you touch">manual</button>
+                    </div>
+                    <div class="hrow">
+                        <button type="button" id="planClear" title="Empty the plan and start from nothing">clear all</button>
+                    </div>
+                    <span class="hint" id="planHint"></span>
+                </div>
+                <p class="cascade" id="planDrop" hidden></p>
+                <div id="planBody"></div>
+                <p class="plan-caveat">
+                    Tokens and requirements are exact &#x2014;the per-attribute token ladders are
+      scraped for all 45 position/height frames and confirmed against a live
+      readout, and the requirements are the engine's own table.
+      <b>Two things are not:</b>
+                    the tier costs 3/5/6/7 rest on two live samples (Breaker and Float Game) and do <em>not</em>
+                    accumulate &mdash;Gold is 6, not 3+5+6. If a badge prices differently it can be corrected per badge. And
+      the number of badge <em>slots</em>
+                    per discipline was never extracted, so
+      this plan is limited by tokens alone. If the game also caps slots, your
+      real loadout is a subset of this one. A fused badge costs no tokens &mdash;you
+      get them back &mdash;so the solver iterates: equip, fuse, refund, re-equip.
+      That reaches a fixed point but is not a proof of optimality; a jointly
+      exact solve is a three-resource problem too slow to run on every drag.
+    
+                </p>
+            </section>
+            <section id="shadesSec" aria-label="Shades"></section>
+            <section class="sheet" id="badgesSheet" aria-label="Badge builder" hidden>
+                <div class="sheet-head">
+                    <h2>Build for badges</h2>
+                    <span class="hint" id="bpSum"></span>
+                </div>
+                <p class="an-note">
+                    Pick the tier you want on up to four badges per
+      category, then press Build these. Each pick becomes an attribute target
+      in the builder, so you can see and edit every number before searching.
+      Tiers your position can never reach are struck through rather than
+      hidden. The small number on a tier is what it actually asks for &mdash;the hardest leg of an <b>and</b>
+                    , the cheapest leg of an <b>or</b>
+                    .
+                </p>
+                <div class="bp-act">
+                    <button type="button" id="bpGo" class="go" disabled>Build these</button>
+                    <button type="button" id="bpClear">Clear</button>
+                </div>
+                <div class="bp-list" id="bpList"></div>
+            </section>
+            <section class="sheet" id="animsSheet" aria-label="Animations">
+                <div class="sheet-head">
+                    <h2>Animations</h2>
+                    <span class="hint" id="anCount"></span>
+                </div>
+                <p class="an-note">
+                    Checked against this build <b>including cap breakers</b>
+                    &mdash;a broken 96 Driving Dunk unlocks what a natural 96 does, confirmed
+      in game. Height is its own answer: an animation outside your frame's band
+      is not a number you can chase.
+                </p>
+                <div class="nm-ctl">
+                    <input id="anSearch" type="search" autocomplete="off" spellcheck="false" placeholder="Search 2,494 animations by name or category...">
+                    <select id="anCat" aria-label="Category">
+                        <option value="">every category</option>
+                    </select>
+                    <select id="anState" aria-label="Status">
+                        <option value="">everything</option>
+                        <option value="have">unlocked</option>
+                        <option value="close">within 5 points</option>
+                        <option value="no">locked</option>
+                        <option value="ht">wrong height</option>
+                    </select>
+                    <select id="anSort" aria-label="Sort">
+                        <option value="close">closest first</option>
+                        <option value="high">highest rating</option>
+                        <option value="low">lowest rating</option>
+                        <option value="name">name</option>
+                    </select>
+                </div>
+                <div class="an-list" id="anList"></div>
+            </section>
+            <section class="sheet" id="namesSheet" aria-label="Build names">
+                <div class="sheet-head">
+                    <h2>Build names</h2>
+                    <span class="hint" id="nmCount"></span>
+                </div>
+                <div class="nm-ctl">
+                    <input id="nmSearch" type="search" autocomplete="off" spellcheck="false" placeholder="Search every build name in the game...">
+                    <select id="nmPos" aria-label="Position">
+                        <option value="">any position</option>
+                        <option value="0">PG</option>
+                        <option value="1">SG</option>
+                        <option value="2">SF</option>
+                        <option value="3">PF</option>
+                        <option value="4">C</option>
+                    </select>
+                    <select id="nmCat" aria-label="Type">
+                        <option value="">any type</option>
+                    </select>
+                    <select id="nmRar" aria-label="Rarity">
+                        <option value="">any rarity</option>
+                        <option value="ultra">ultra</option>
+                        <option value="rare">rare</option>
+                        <option value="uncommon">uncommon</option>
+                        <option value="common">common</option>
+                        <option value="everyday">everyday</option>
+                    </select>
+                </div>
+                <div class="nm-detail" id="nmDetail" hidden></div>
+                <div class="nm-list" id="nmList"></div>
+                <p class="nm-foot">Rarity is measured, not guessed: the count is how many of
+      the game &#8217;s 137,959 attribute profiles earn that name, read from the
+      same table that names your build.</p>
+            </section>
+            <!-- WHERE CAP BREAKERS PAY BEST. The ladder scale is s = (mx - w[a]) / mx over
+       the landed player type's weight row, so how far five breakers carry an
+       attribute swings enormously with height and with the shape of the build.
+       Nobody else can publish this table because nobody else computes the
+       ladder. -->
+            <section class="sheet" id="parksSheet" aria-label="Cap breakers">
+                <div class="sheet-head">
+                    <h2>Where cap breakers pay best</h2>
+                    <span class="hint" id="pkCount"></span>
+                </div>
+                <div class="nm-ctl">
+                    <select id="pkAttr" aria-label="Attribute"></select>
+                    <select id="pkPos" aria-label="Position">
+                        <option value="">any position</option>
+                        <option value="0">PG</option>
+                        <option value="1">SG</option>
+                        <option value="2">SF</option>
+                        <option value="3">PF</option>
+                        <option value="4">C</option>
+                    </select>
+                    <select id="pkCaps" aria-label="Cap breakers">
+                        <option value="3">3 breakers</option>
+                        <option value="5" selected>5 breakers</option>
+                        <option value="7">7 breakers</option>
+                        <option value="10">10 breakers</option>
+                        <option value="15">15 breakers</option>
+                    </select>
+                </div>
+                <p class="pk-note" id="pkNote" hidden></p>
+                <div class="nm-list" id="pkList"></div>
+                <p class="nm-foot">
+                    The park is exact arithmetic off the game &#8217;s weights
+      table. Collecting it means the finished build landing on that player type,
+      which is a search problem &mdash;so these read <b>up to</b>
+                    . Click a row
+      and the finder will try to build it.
+                </p>
+            </section>
+            <!-- The affiliation notice is in the SHARED shell, not the web module, because
+       it is true of the artifact too. The Privacy/Terms links are not: those
+       pages exist only on the site, so web_legal.js appends them there and the
+       artifact is left with a footer whose every link works. -->
+            <footer>
+                Ceilings, cap breaker ladders, the constraint graph, badge requirements and the
+    badge-token ladders are read out of NBA 2K27's own tuning tables
+    (<b>tune 286298702</b>
+                ) &#x2014;not fitted or estimated. Ladders reproduce the engine on
+    100,000 slots; Overall on 200,000 builds; a full live build matched
+    <b>21/21 ceilings and 21/21 ladders</b>
+                . The tables ship with the page, so the
+    builder computes in your browser rather than asking a server. (Accounts and
+    the premium solvers are the exception &#x2014;those need the network.)
+    <span id="legalLinks"></span>
+                <!-- Testers, credited by name. Static on purpose: they are owed the credit
+         now, not whenever they get round to making an account. Once they do and
+         pick their handle, pending_grants also gives them a TESTER badge in the
+         community feed and a year of Premium -- this line does not go away, it
+         is the standing thanks. -->
+                <span class="thanks">
+                    Tested by <b>Cahmron</b>
+                    , <b>WayneCoolin</b>
+                    ,
+    <b>iKenoBeno</b>
+                    and <b>FreedomHGA</b>
+                    &#x2014;the corrections that came back from
+    them are in the model, not just the notes.
+                </span>
+                <span class="disc-l">
+                    <b>Not affiliated with 2K, Visual Concepts or the NBA.</b>
+                    An independent fan-made tool, not endorsed by or connected with Take-Two
+    Interactive, 2K Games, Visual Concepts, the NBA or the WNBA. All trademarks
+    belong to their respective owners.
+                </span>
+            </footer>
+        </div>
+<script src="./js/goated-build-lab.core-desc.js"></script>
+<script src="./js/goated-build-lab.shades-data.js"></script>
+<script src="./js/goated-build-lab.shades.js"></script>
+<script src="./js/goated-build-lab.meta.js"></script>
+<script src="./js/goated-build-lab.tables.js"></script>
+<script src="./js/goated-build-lab.api-client.js"></script>
+<script src="./js/goated-build-lab.app.js"></script>
+<script src="./js/goated-build-lab.avatar-config.js"></script>
+<script src="./js/goated-build-lab.web-config.js"></script>
+<script type="module" src="./js/goated-build-lab.module.js"></script>
+    </body>
+</html>
