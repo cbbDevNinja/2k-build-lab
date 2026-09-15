@@ -5022,7 +5022,7 @@
                     return shot && ball && defense && physical && groups[0] >= 67.9 && groups[0] - groups[1] >= 4.44;
                 }
 
-                function dayOneSpec() {
+                function dayOneSpec(shotName, shotValue) {
                     var pos = +$('fPos').value;
                     var band = $('fHt').value;
                     var hmin = null, hmax = null;
@@ -5037,7 +5037,7 @@
                         good: [],
                         excel: [],
                         attrs: {
-                            'Three-Point': 80,
+                            [shotName]: shotValue,
                             'Ball Handle': 75,
                             'Speed w/ Ball': 72,
                             'Pass Accuracy': 70,
@@ -5047,7 +5047,7 @@
                             'Vertical': 65
                         },
                         fmode: {
-                            'Three-Point': 'stock',
+                            [shotName]: 'stock',
                             'Ball Handle': 'stock',
                             'Speed w/ Ball': 'stock',
                             'Pass Accuracy': 'stock',
@@ -5063,12 +5063,86 @@
                     });
                 }
 
+                function dayOneVariants() {
+                    return [
+                        ['Three-Point', 80, 'shooter'],
+                        ['Mid-Range', 82, 'mid-range creator'],
+                        ['Driving Layup', 80, 'slasher'],
+                        ['Driving Dunk', 80, 'dunker']
+                    ];
+                }
+
+                function searchDayOne() {
+                    var variants = dayOneVariants(), all = [], index = 0;
+                    BUSY = true;
+                    busy('go', true);
+                    busy('goTick', true);
+                    busy('dayOneFind', true);
+
+                    function next() {
+                        if (index >= variants.length) {
+                            var seen = {}, unique = [];
+                            all.sort(function(a, b) {
+                                return (b.ovr - a.ovr) || (b.raw - a.raw) || (b.body[0] - a.body[0]);
+                            });
+                            all.forEach(function(r) {
+                                var key = r.body.join(',') + '|' + r.alloc.join(',');
+                                if (!seen[key]) {
+                                    seen[key] = 1;
+                                    unique.push(r);
+                                }
+                            });
+                            var varied = [], heights = {};
+                            unique.forEach(function(r) {
+                                if (!heights[r.body[0]] && varied.length < 10) {
+                                    heights[r.body[0]] = 1;
+                                    varied.push(r);
+                                }
+                            });
+                            unique.forEach(function(r) {
+                                if (varied.length < 14 && varied.indexOf(r) < 0)
+                                    varied.push(r);
+                            });
+                            RESULTS = varied;
+                            CURSPEC = dayOneSpec(variants[0][0], variants[0][1]);
+                            BUSY = false;
+                            busy('go', false);
+                            busy('goTick', false);
+                            busy('dayOneFind', false);
+                            if (!RESULTS.length) {
+                                $('alts').innerHTML = '';
+                                $('sortby').hidden = true;
+                                say('No build in the selected frame range passed every day-one gate at 85 OVR. Try another position, height, or wider height range.', 'warn');
+                                return;
+                            }
+                            showAlts();
+                            applyResult(RESULTS[0]);
+                            say('<b>' + RESULTS.length + '</b> day-one builds across ' + Object.keys(heights).length + ' heights \u00b7 all pass the badge-free gates at 85 OVR \u00b7 scoring paths: shooter, creator, slasher, and dunker.');
+                            return;
+                        }
+
+                        var variant = variants[index++];
+                        var sp = dayOneSpec(variant[0], variant[1]);
+                        CURSPEC = sp;
+                        say('Searching day-one ' + variant[2] + ' builds...');
+                        runFinder(sp, function(done, total) {
+                            say('Searching day-one ' + variant[2] + ' builds... ' + done + '/' + total);
+                        }, function(res) {
+                            res.forEach(function(r) {
+                                r.dayOnePath = variant[2];
+                                all.push(r);
+                            });
+                            next();
+                        });
+                    }
+
+                    next();
+                }
+
                 $('dayOneFind').addEventListener('click', function() {
                     if (BUSY)
                         return;
-                    var sp = dayOneSpec();
-                    say('Searching for a badge-free build that passes every day-one gate at 85 OVR...');
-                    search(sp);
+                    searchDayOne();
                 });
 
                 /* \u2500\u2500 the one model call \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -6105,6 +6179,8 @@
                             note += ' \u00b7 +' + r.gain + ' free';
                         if (r.flaws && r.flaws.length)
                             note += ' \u00b7 \u26a0 ' + esc(r.flaws[0]);
+                        if (r.dayOnePath)
+                            note += ' \u00b7 ' + esc(r.dayOnePath);
                         /* The numbers that do not vary are still TRUE, so they move to the
        tooltip rather than being deleted -- somebody comparing two frames at
        1532 and 1516 points should still be able to find that out. */
