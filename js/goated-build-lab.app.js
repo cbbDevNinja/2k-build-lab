@@ -2302,12 +2302,13 @@
                 }
 
                 function comparePlayers() {
-                    var button = $('comparePlayers'), status = $('similarityStatus'), list = $('similarityList');
-                    if (!button || !status || !list || !LAST_SERVER_PAYLOAD || !window.GBLApi || !window.GBLApi.similarity)
+                    var button = $('comparePlayers'), status = $('similarityStatus'), list = $('similarityList'), visual = $('comparisonVisual');
+                    if (!button || !status || !list || !visual || !LAST_SERVER_PAYLOAD || !window.GBLApi || !window.GBLApi.similarity)
                         return;
                     button.disabled = true;
                     status.textContent = 'Comparing...';
                     list.innerHTML = '';
+                    visual.innerHTML = '';
                     window.GBLApi.similarity({
                         attributes: LAST_SERVER_PAYLOAD.attributes,
                         finalAttributes: LAST_SERVER_PAYLOAD.finalAttributes,
@@ -2320,6 +2321,15 @@
                         var sim = rsp && rsp.similarity;
                         var matches = sim && sim.matches || [];
                         status.textContent = sim ? ('source: ' + sim.source) : 'No comparison available';
+                        function meter(label, value) {
+                            if (value === null || value === undefined || !isFinite(Number(value)))
+                                return '<div class="comparison-meter"><span>' + label + '</span><span>not available</span><span>--</span></div>';
+                            var score = Math.max(0, Math.min(100, Number(value)));
+                            return '<div class="comparison-meter"><span>' + label + '</span><span class="comparison-meter-track"><i class="comparison-meter-fill" style="width:' + score + '%"></i></span><b>' + score.toFixed(0) + '%</b></div>';
+                        }
+                        visual.innerHTML = matches.slice(0, 3).map(function(m) {
+                            return '<article class="comparison-card"><div class="comparison-card-head"><span><b>' + esc(m.name) + '</b><br><small>' + esc(m.position || '') + ' · ' + (m.consideredAttributes || 0) + '/21 shared attributes</small></span><strong>' + Number(m.similarity).toFixed(0) + '%</strong></div>' + meter('Attributes', m.attributeSimilarity) + meter('Body', m.physicalSimilarity) + meter('Position', m.positionFit) + meter('Breakers', m.capBreakerDependence === null ? null : 100 - Number(m.capBreakerDependence)) + '<p class="comparison-animation-note">Animations: player package not mapped. Build animation eligibility is checked separately in the Animations panel.</p></article>';
+                        }).join('');
                         list.innerHTML = matches.map(function(m) {
                             var detail = 'attributes ' + Number(m.attributeSimilarity || m.similarity).toFixed(1) + '%';
                             if (m.physicalSimilarity !== null) detail += ' · body ' + Number(m.physicalSimilarity).toFixed(1) + '%';

@@ -1795,6 +1795,59 @@
 
             .similarity-row small { color: var(--ink-2); }
 
+            .comparison-visual {
+                display: grid;
+                gap: 10px;
+                grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+                margin: 14px 15px 0;
+            }
+
+            .comparison-card {
+                background: var(--raise);
+                border: 1px solid var(--line);
+                padding: 12px;
+            }
+
+            .comparison-card-head {
+                align-items: baseline;
+                display: flex;
+                gap: 8px;
+                justify-content: space-between;
+                margin-bottom: 10px;
+            }
+
+            .comparison-card-head strong { font-size: 20px; }
+            .comparison-card-head small { color: var(--ink-2); }
+
+            .comparison-meter {
+                display: grid;
+                gap: 4px;
+                grid-template-columns: 78px 1fr 42px;
+                align-items: center;
+                font-size: 11px;
+                margin-top: 7px;
+            }
+
+            .comparison-meter-track {
+                background: var(--sunk);
+                border: 1px solid var(--line-2);
+                height: 7px;
+                overflow: hidden;
+            }
+
+            .comparison-meter-fill {
+                background: linear-gradient(90deg, var(--cyan), var(--amber-fill));
+                height: 100%;
+            }
+
+            .comparison-animation-note {
+                border-top: 1px solid var(--line-2);
+                color: var(--ink-2);
+                font-size: 11px;
+                margin-top: 10px;
+                padding-top: 8px;
+            }
+
             .hrow {
                 display: flex;
                 gap: 6px;
