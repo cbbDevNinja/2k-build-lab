@@ -6,8 +6,8 @@ const ATTR_KEYS = [
   ["drivingDunk", "driving_dunk", "dunk"],
   ["standingDunk", "standing_dunk"],
   ["postControl", "post_control", "post"],
-  ["midRange", "mid_range", "mid"],
-  ["threePoint", "three_point", "three", "threePt"],
+  ["midRangeShot", "midRange", "mid_range", "mid"],
+  ["threePointShot", "threePoint", "three_point", "three", "threePt"],
   ["freeThrow", "free_throw", "ft"],
   ["passAccuracy", "pass_accuracy", "pass"],
   ["ballHandle", "ball_handle", "handle"],
@@ -117,7 +117,7 @@ function scoreAgainstCatalog(attributes, catalog, topN = 5) {
     const { score, coverage } = cosine(b, p);
     scored.push({
       name: player.name || player.playerName || "Unknown",
-      position: player.position || player.pos || "",
+      position: player.positions?.join("/") || player.position || player.pos || "",
       team: player.team || player.teamName || "",
       similarity: +(score * 100).toFixed(2),
       coverage: +(coverage * 100).toFixed(1),
@@ -150,7 +150,8 @@ async function fetchExternalCatalog() {
 
   try {
     recordExternalRequest(now);
-    const res = await fetch(`${config.nba2kApiBaseUrl}${config.nba2kApiPlayersPath}`, {
+    const separator = config.nba2kApiPlayersPath.includes("?") ? "&" : "?";
+    const res = await fetch(`${config.nba2kApiBaseUrl}${config.nba2kApiPlayersPath}${separator}teamType=curr`, {
       method: "GET",
       headers,
       signal: controller.signal,

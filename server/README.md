@@ -73,10 +73,10 @@ If external API is disabled/unavailable or quota is hit, the API falls back to a
 Set these in `server/.env` to enable:
 
 - `NBA2K_API_ENABLED=true`
-- `NBA2K_API_BASE_URL=...`
-- `NBA2K_API_PLAYERS_PATH=/players`
+- `NBA2K_API_BASE_URL=https://api.nba2kapi.com`
+- `NBA2K_API_PLAYERS_PATH=/api/players/bulk`
 - `NBA2K_API_KEY=...`
-- `NBA2K_API_KEY_HEADER=x-api-key`
+- `NBA2K_API_KEY_HEADER=X-API-Key`
 - `NBA2K_API_MAX_REQUESTS_PER_HOUR=450`
 - `NBA2K_SIMILARITY_CACHE_TTL_MS=21600000`
 

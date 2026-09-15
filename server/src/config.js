@@ -31,7 +31,7 @@ export const config = {
   allowedOrigins: toList(process.env.ALLOWED_ORIGINS),
   nba2kApiEnabled: toBool(process.env.NBA2K_API_ENABLED, false),
   nba2kApiBaseUrl: (process.env.NBA2K_API_BASE_URL || "").replace(/\/+$/, ""),
-  nba2kApiPlayersPath: process.env.NBA2K_API_PLAYERS_PATH || "/players",
+  nba2kApiPlayersPath: process.env.NBA2K_API_PLAYERS_PATH || "/api/players/bulk",
   nba2kApiKey: process.env.NBA2K_API_KEY || "",
   nba2kApiKeyHeader: process.env.NBA2K_API_KEY_HEADER || "x-api-key",
   nba2kApiTimeoutMs: Number(process.env.NBA2K_API_TIMEOUT_MS || 4500),
