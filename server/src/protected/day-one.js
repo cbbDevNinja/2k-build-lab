@@ -99,8 +99,8 @@ export function certifyDayOneBuild({ attributes, overallPotential, position }) {
   const gates = [
     {
       key: "overall_cap",
-      label: "85 OVR cap gate",
-      pass: Number(overallPotential) <= 85,
+      label: "85 OVR target gate",
+      pass: Number(overallPotential) === 85,
       detail: `overallPotential=${overallPotential}`,
     },
     {

@@ -4500,6 +4500,12 @@
                         return null;
                     // named floors alone do not fit
 
+                    if (spec.dayOne) {
+                        v = fillToExactDayOne(v, hb, caps);
+                        if (!v)
+                            return null;
+                    }
+
                     var soft = tg.filter(function(t) {
                         return !t.named;
                     })
@@ -5005,7 +5011,7 @@
 
                 function dayOneCandidatePass(r, pos) {
                     var v = r.after || r.alloc;
-                    if (!v || v.length !== 21 || Number(r.ovr) > 85)
+                    if (!v || v.length !== 21 || Number(r.ovr) !== 85)
                         return false;
                     var shot = v[6] >= 80 || v[5] >= 82 || v[1] >= 80 || v[2] >= 80;
                     var ball = v[9] >= 75 && v[10] >= 72 && v[8] >= 70;
@@ -5020,6 +5026,35 @@
                         (v[17] + v[18] + v[19] + v[20]) / 4
                     ].sort(function(a, b) { return b - a; });
                     return shot && ball && defense && physical && groups[0] >= 67.9 && groups[0] - groups[1] >= 4.44;
+                }
+
+                function fillToExactDayOne(v, hb, caps) {
+                    var current = v.slice();
+                    if (overallOf(current, hb, caps) === 85)
+                        return current;
+                    for (var pass = 0; pass < 2000; pass++) {
+                        var best = null;
+                        for (var a = 0; a < 21; a++) {
+                            if (current[a] >= caps[a])
+                                continue;
+                            var next = current.slice();
+                            next[a]++;
+                            settle(next, hb, caps);
+                            if (overCap(next, caps))
+                                continue;
+                            var nextOvr = overallOf(next, hb, caps);
+                            if (nextOvr > 85)
+                                continue;
+                            if (!best || ratingOf(next, hb) > ratingOf(best, hb))
+                                best = next;
+                        }
+                        if (!best)
+                            return null;
+                        current = best;
+                        if (overallOf(current, hb, caps) === 85)
+                            return current;
+                    }
+                    return null;
                 }
 
                 function dayOneSpec(shotName, shotValue) {
