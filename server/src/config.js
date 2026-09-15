@@ -29,6 +29,14 @@ export const config = {
   supabaseUrl: process.env.SUPABASE_URL || "",
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
   allowedOrigins: toList(process.env.ALLOWED_ORIGINS),
+  nba2kApiEnabled: toBool(process.env.NBA2K_API_ENABLED, false),
+  nba2kApiBaseUrl: (process.env.NBA2K_API_BASE_URL || "").replace(/\/+$/, ""),
+  nba2kApiPlayersPath: process.env.NBA2K_API_PLAYERS_PATH || "/players",
+  nba2kApiKey: process.env.NBA2K_API_KEY || "",
+  nba2kApiKeyHeader: process.env.NBA2K_API_KEY_HEADER || "x-api-key",
+  nba2kApiTimeoutMs: Number(process.env.NBA2K_API_TIMEOUT_MS || 4500),
+  nba2kApiMaxRequestsPerHour: Number(process.env.NBA2K_API_MAX_REQUESTS_PER_HOUR || 450),
+  nba2kSimilarityCacheTtlMs: Number(process.env.NBA2K_SIMILARITY_CACHE_TTL_MS || 21600000),
 };
 
 export function assertProdConfig() {
@@ -46,5 +54,9 @@ export function assertProdConfig() {
 
   if (config.requireInviteCode && config.requireSitePassword) {
     throw new Error("Use either REQUIRE_INVITE_CODE or REQUIRE_SITE_PASSWORD, not both");
+  }
+
+  if (config.nba2kApiEnabled && (!config.nba2kApiBaseUrl || !config.nba2kApiKey)) {
+    throw new Error("NBA2K_API_ENABLED=true but NBA2K_API_BASE_URL/NBA2K_API_KEY are missing");
   }
 }

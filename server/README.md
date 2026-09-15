@@ -38,6 +38,54 @@ If `REQUIRE_AUTH=true`, pass a Supabase access token:
 
 - Header: `Authorization: Bearer <access_token>`
 
+### Day-one certification (badge-free)
+
+`POST /api/solver/evaluate` now also returns a deterministic `dayOne` object.
+
+This is a pre-game pass/fail check for:
+
+- 85 OVR cap
+- scoring action floor
+- ball security floor
+- defensive survivability floor
+- physical floor
+- role identity
+- budget efficiency
+
+No telemetry and no badge assumptions are used.
+
+### Player similarity (on-demand)
+
+Use this only when the user asks for comps (not on every slider change):
+
+`POST /api/solver/similarity`
+
+Body:
+
+`{"attributes":[...21 values...],"topN":5}`
+
+Response includes top player matches and similarity score.
+
+If external API is disabled/unavailable or quota is hit, the API falls back to an internal prototype catalog.
+
+### Optional external similarity provider (NBA2KAPI)
+
+Set these in `server/.env` to enable:
+
+- `NBA2K_API_ENABLED=true`
+- `NBA2K_API_BASE_URL=...`
+- `NBA2K_API_PLAYERS_PATH=/players`
+- `NBA2K_API_KEY=...`
+- `NBA2K_API_KEY_HEADER=x-api-key`
+- `NBA2K_API_MAX_REQUESTS_PER_HOUR=450`
+- `NBA2K_SIMILARITY_CACHE_TTL_MS=21600000`
+
+Quota safety notes:
+
+- Keep hourly limit below provider cap (500/hour).
+- Similarity endpoint is separate from evaluate to avoid burning quota during normal builder interactions.
+- Server caches player catalog responses.
+
 ## Migration plan for real protection
 
 1. Move crown-jewel functions from client files into `server/src/protected/`.

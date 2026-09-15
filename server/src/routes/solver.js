@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
 import { evaluateBuild } from "../protected/build-logic.js";
+import { certifyDayOneBuild } from "../protected/day-one.js";
+import { computeSimilarity } from "../protected/player-similarity.js";
 import { solverRateLimit } from "../middleware/rate.js";
 import { requireAuth } from "../middleware/auth.js";
 
@@ -14,6 +16,13 @@ const BodySchema = z.object({
   bodyHb: z.number().int().min(0).max(30),
   bodyCaps: z.array(z.number()).length(21),
   capBreakers: z.number().int().min(0).max(15).optional(),
+  includeSimilarity: z.boolean().optional(),
+  similarityTopN: z.number().int().min(1).max(10).optional(),
+});
+
+const SimilarityBodySchema = z.object({
+  attributes: z.array(z.number()).length(21),
+  topN: z.number().int().min(1).max(10).optional(),
 });
 
 export function solverRouter() {
@@ -30,10 +39,46 @@ export function solverRouter() {
 
     try {
       const out = await evaluateBuild(parsed.data);
-      return res.json({ ok: true, auth: req.auth, result: out });
+      const dayOne = certifyDayOneBuild({
+        attributes: parsed.data.attributes,
+        overallPotential: out.overallPotential,
+        position: parsed.data.position,
+      });
+
+      let similarity = null;
+      if (parsed.data.includeSimilarity) {
+        similarity = await computeSimilarity({
+          attributes: parsed.data.attributes,
+          topN: parsed.data.similarityTopN || 5,
+        });
+      }
+
+      return res.json({ ok: true, auth: req.auth, result: out, dayOne, similarity });
     } catch (err) {
       return res.status(400).json({
         error: err instanceof Error ? err.message : "Could not evaluate build",
+      });
+    }
+  });
+
+  r.post("/similarity", solverRateLimit, requireAuth, async (req, res) => {
+    const parsed = SimilarityBodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: "Invalid payload",
+        details: parsed.error.flatten(),
+      });
+    }
+
+    try {
+      const similarity = await computeSimilarity({
+        attributes: parsed.data.attributes,
+        topN: parsed.data.topN || 5,
+      });
+      return res.json({ ok: true, auth: req.auth, similarity });
+    } catch (err) {
+      return res.status(400).json({
+        error: err instanceof Error ? err.message : "Could not compute similarity",
       });
     }
   });

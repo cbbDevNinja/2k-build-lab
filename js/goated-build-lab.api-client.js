@@ -37,5 +37,28 @@
     return data;
   }
 
-  global.GBLApi = { evaluateBuild: evaluateBuild };
+  async function similarity(payload, opts) {
+    var base = (opts && opts.baseUrl) || defaultBaseUrl();
+    var token = opts && opts.bearer;
+    var headers = { "content-type": "application/json" };
+    if (token) headers.Authorization = "Bearer " + token;
+
+    var res = await fetch(base + "/api/solver/similarity", {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(payload),
+    });
+
+    var data = await res.json().catch(function () {
+      return { error: "Invalid JSON response" };
+    });
+
+    if (!res.ok) {
+      throw new Error(data && data.error ? data.error : "API request failed");
+    }
+
+    return data;
+  }
+
+  global.GBLApi = { evaluateBuild: evaluateBuild, similarity: similarity };
 })(typeof window !== "undefined" ? window : globalThis);

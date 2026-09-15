@@ -40,6 +40,7 @@
                 var CON = TABLES.CON;
                 var LERP = TABLES.LERP;
                                 var SERVER_NOTE = ''
+                                    , DAY_ONE_NOTE = ''
                   , SERVER_SIG = ''
                   , SERVER_T = 0
                   , SERVER_SEQ = 0
@@ -94,12 +95,15 @@
                                 atWall: !!r.engine.atWall,
                                 modelVersion: r.modelVersion || ''
                             };
+                            var d1 = rsp && rsp.dayOne;
+                            DAY_ONE_NOTE = d1 && typeof d1.passed === 'boolean' ? (' \u00b7 day one ' + (d1.passed ? 'PASS' : 'FAIL')) : '';
                             SERVER_NOTE = ' \u00b7 server overall ' + Number(r.engine.overallAlloc).toFixed(0) + ' / raw ' + Number(r.engine.rawAlloc).toFixed(4) + (r.modelVersion ? (' (' + r.modelVersion + ')') : '');
-                            $('sheetHint').textContent = SHEET_HINT_BASE + SERVER_NOTE;
+                            $('sheetHint').textContent = SHEET_HINT_BASE + DAY_ONE_NOTE + SERVER_NOTE;
                             render();
                         }).catch(function() {
                             if (seq !== SERVER_SEQ)
                                 return;
+                            DAY_ONE_NOTE = '';
                             SERVER_NOTE = '';
                             SERVER_METRICS = null;
                         });
@@ -2251,7 +2255,7 @@
                     }
 
                     SHEET_HINT_BASE = total + ' pts \u00b7 ' + used + ' breakers spent \u00b7 ' + live + ' live slots \u00b7 ' + maxed + '/21 at ceiling' + (gained > 0 ? (' \u00b7 +' + gained + ' from breakers') : '');
-                    $('sheetHint').textContent = SHEET_HINT_BASE + SERVER_NOTE;
+                    $('sheetHint').textContent = SHEET_HINT_BASE + DAY_ONE_NOTE + SERVER_NOTE;
 
                     renderTokens(vals);
                     renderBadges(alloc, vals, caps);
