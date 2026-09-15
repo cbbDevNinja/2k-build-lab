@@ -10,7 +10,9 @@
     "start": "node server/src/index.js",
     "api:dev": "node --watch server/src/index.js",
     "api:start": "node server/src/index.js",
-    "invite:make": "node server/scripts/make-invite-code.js"
+    "invite:make": "node server/scripts/make-invite-code.js",
+    "release:snapshot": "node scripts/release-snapshot.mjs",
+    "release:list": "git tag --list 'v*' --sort=-creatordate"
   },
   "dependencies": {
     "cors": "^2.8.5",
