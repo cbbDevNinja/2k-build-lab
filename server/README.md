@@ -66,6 +66,8 @@ Body:
 
 Response includes top player matches and similarity score.
 
+Missing or invalid player attributes are excluded from the score rather than treated as zero. Each match also reports `consideredAttributes` and `coverage`, so a high score with incomplete source data is visible.
+
 If external API is disabled/unavailable or quota is hit, the API falls back to an internal prototype catalog.
 
 ### Optional external similarity provider (NBA2KAPI)

@@ -2313,7 +2313,7 @@
                         var matches = sim && sim.matches || [];
                         status.textContent = sim ? ('source: ' + sim.source) : 'No comparison available';
                         list.innerHTML = matches.map(function(m) {
-                            return '<div class="similarity-row"><span><b>' + esc(m.name) + '</b> <small>' + esc(m.position || '') + '</small></span><strong>' + Number(m.similarity).toFixed(1) + '%</strong></div>';
+                            return '<div class="similarity-row"><span><b>' + esc(m.name) + '</b> <small>' + esc(m.position || '') + '</small><br><small>based on ' + (m.consideredAttributes || 0) + '/21 shared attributes</small></span><strong>' + Number(m.similarity).toFixed(1) + '%</strong></div>';
                         }).join('');
                     }).catch(function(err) {
                         status.textContent = err && err.message ? err.message : 'Comparison unavailable';

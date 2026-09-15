@@ -76,10 +76,11 @@ function cosine(a, b) {
     nb += bv * bv;
     used += 1;
   }
-  if (!used || !na || !nb) return { score: 0, coverage: 0 };
+  if (!used || !na || !nb) return { score: 0, coverage: 0, consideredAttributes: used };
   return {
     score: dot / (Math.sqrt(na) * Math.sqrt(nb)),
     coverage: used / a.length,
+    consideredAttributes: used,
   };
 }
 
@@ -87,7 +88,8 @@ function getByAliases(obj, aliases) {
   if (!obj || typeof obj !== "object") return NaN;
   for (const key of aliases) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      return num(obj[key]);
+      const value = num(obj[key]);
+      if (Number.isFinite(value)) return value;
     }
   }
   return NaN;
@@ -114,13 +116,14 @@ function scoreAgainstCatalog(attributes, catalog, topN = 5) {
 
   for (const player of catalog) {
     const p = playerToVector(player);
-    const { score, coverage } = cosine(b, p);
+    const { score, coverage, consideredAttributes } = cosine(b, p);
     scored.push({
       name: player.name || player.playerName || "Unknown",
       position: player.positions?.join("/") || player.position || player.pos || "",
       team: player.team || player.teamName || "",
       similarity: +(score * 100).toFixed(2),
       coverage: +(coverage * 100).toFixed(1),
+      consideredAttributes,
     });
   }
 
