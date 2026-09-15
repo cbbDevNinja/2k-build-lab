@@ -109,16 +109,23 @@ function movementSimilarity(a, b) {
   let distance = 0;
   let totalWeight = 0;
   let used = 0;
+  let maxGap = 0;
   for (const [indexText, weight] of Object.entries(MOVEMENT_WEIGHTS)) {
     const index = Number(indexText);
     if (!Number.isFinite(a[index]) || !Number.isFinite(b[index])) continue;
+    const gap = Math.abs(a[index] - b[index]) * 74;
+    maxGap = Math.max(maxGap, gap);
     distance += weight * Math.abs(a[index] - b[index]);
     totalWeight += weight;
     used += 1;
   }
+  const rawScore = totalWeight ? Math.max(0, 1 - distance / totalWeight) : null;
+  const gapCeiling = maxGap >= 20 ? 0.70 : maxGap >= 15 ? 0.80 : maxGap >= 10 ? 0.90 : 1;
   return {
-    score: totalWeight ? Math.max(0, 1 - distance / totalWeight) : null,
+    score: rawScore === null ? null : Math.min(rawScore, gapCeiling),
     considered: used,
+    maxGap,
+    gapCeiling,
   };
 }
 
@@ -273,6 +280,8 @@ function scoreAgainstCatalog(build, catalog, topN = 5) {
       exactAttributeSimilarity: +(closeness.score * 100).toFixed(2),
       movementSimilarity: movement.score === null ? null : +(movement.score * 100).toFixed(2),
       movementAttributes: movement.considered,
+      largestMovementGap: +movement.maxGap.toFixed(1),
+      movementGapCeiling: +(movement.gapCeiling * 100).toFixed(1),
       physicalSimilarity: physical.score === null ? null : +(physical.score * 100).toFixed(2),
       positionFit: positionFit === null ? null : +(positionFit * 100).toFixed(2),
       capBreakerDependence: capDependence === null ? null : +(capDependence * 100).toFixed(2),
