@@ -104,6 +104,23 @@ function cosine(a, b, weights) {
   };
 }
 
+function absoluteCloseness(a, b, weights) {
+  let weightedDistance = 0;
+  let totalWeight = 0;
+  let used = 0;
+  for (let i = 0; i < a.length; i++) {
+    if (!Number.isFinite(a[i]) || !Number.isFinite(b[i])) continue;
+    const weight = weights?.[i] || 1;
+    weightedDistance += weight * Math.abs(a[i] - b[i]);
+    totalWeight += weight;
+    used += 1;
+  }
+  return {
+    score: totalWeight ? Math.max(0, 1 - weightedDistance / totalWeight) : 0,
+    consideredAttributes: used,
+  };
+}
+
 function getByAliases(obj, aliases) {
   if (!obj || typeof obj !== "object") return NaN;
   for (const key of aliases) {
@@ -214,11 +231,12 @@ function scoreAgainstCatalog(build, catalog, topN = 5) {
   for (const player of catalog) {
     const p = playerToVector(player);
     const { score, coverage, consideredAttributes } = cosine(b, p, weights);
+    const closeness = absoluteCloseness(b, p, weights);
     const physical = physicalSimilarity(build, player);
     const positionFit = positionSimilarity(build.position, player);
     const capDependence = capBreakerDependence(build);
     const components = [
-      { value: score, weight: 0.65 },
+      { value: (score * 0.45) + (closeness.score * 0.55), weight: 0.65 },
       { value: physical.score, weight: 0.2 },
       { value: positionFit, weight: 0.15 },
     ].filter((x) => x.value !== null);
@@ -229,7 +247,9 @@ function scoreAgainstCatalog(build, catalog, topN = 5) {
       position: player.positions?.join("/") || player.position || player.pos || "",
       team: player.team || player.teamName || "",
       similarity: +(profileScore * 100).toFixed(2),
-      attributeSimilarity: +(score * 100).toFixed(2),
+      attributeSimilarity: +(((score * 0.45) + (closeness.score * 0.55)) * 100).toFixed(2),
+      profileShapeSimilarity: +(score * 100).toFixed(2),
+      exactAttributeSimilarity: +(closeness.score * 100).toFixed(2),
       physicalSimilarity: physical.score === null ? null : +(physical.score * 100).toFixed(2),
       positionFit: positionFit === null ? null : +(positionFit * 100).toFixed(2),
       capBreakerDependence: capDependence === null ? null : +(capDependence * 100).toFixed(2),

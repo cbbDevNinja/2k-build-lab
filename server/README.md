@@ -64,7 +64,7 @@ Body:
 
 `{"attributes":[...21 values...],"topN":5}`
 
-Response includes top player matches and a composite similarity score. The composite combines role-weighted attribute similarity, physical profile similarity, and position fit. `capBreakerDependence` is reported separately so a build that only resembles the player after breakers is visible.
+Response includes top player matches and a composite similarity score. The attribute component combines role-weighted profile shape with weighted absolute closeness, so large gaps such as Driving Dunk 94 versus 75 directly reduce similarity. Physical profile similarity and position fit are also included. `capBreakerDependence` is reported separately so a build that only resembles the player after breakers is visible.
 
 Missing or invalid player attributes are excluded from the score rather than treated as zero. Each match also reports `consideredAttributes` and `coverage`, so a high score with incomplete source data is visible.
 

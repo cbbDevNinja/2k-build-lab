@@ -2338,6 +2338,7 @@
                         }).join('');
                         list.innerHTML = matches.map(function(m) {
                             var detail = 'attributes ' + Number(m.attributeSimilarity || m.similarity).toFixed(1) + '%';
+                            if (m.exactAttributeSimilarity !== undefined) detail += ' · closeness ' + Number(m.exactAttributeSimilarity).toFixed(1) + '%';
                             if (m.physicalSimilarity !== null) detail += ' · body ' + Number(m.physicalSimilarity).toFixed(1) + '%';
                             if (m.positionFit !== null) detail += ' · position ' + Number(m.positionFit).toFixed(0) + '%';
                             if (m.capBreakerDependence !== null) detail += ' · breaker dependence ' + Number(m.capBreakerDependence).toFixed(0) + '%';
