@@ -41,6 +41,7 @@ const ROLE_WEIGHTS = {
 
 const POSITION_NAMES = ["PG", "SG", "SF", "PF", "C"];
 const PHYSICAL_KEYS = ["height", "weight", "wingspan"];
+const MOVEMENT_WEIGHTS = { 9: 1.4, 10: 1.4, 17: 1.1, 18: 1.1, 20: 0.8 };
 
 const protoCatalog = [
   { name: "Tyrese Haliburton", position: "PG", attrs: [55, 72, 55, 30, 35, 86, 89, 75, 92, 88, 84, 45, 72, 65, 40, 35, 45, 82, 82, 45, 72] },
@@ -101,6 +102,23 @@ function cosine(a, b, weights) {
     score: dot / (Math.sqrt(na) * Math.sqrt(nb)),
     coverage: used / a.length,
     consideredAttributes: used,
+  };
+}
+
+function movementSimilarity(a, b) {
+  let distance = 0;
+  let totalWeight = 0;
+  let used = 0;
+  for (const [indexText, weight] of Object.entries(MOVEMENT_WEIGHTS)) {
+    const index = Number(indexText);
+    if (!Number.isFinite(a[index]) || !Number.isFinite(b[index])) continue;
+    distance += weight * Math.abs(a[index] - b[index]);
+    totalWeight += weight;
+    used += 1;
+  }
+  return {
+    score: totalWeight ? Math.max(0, 1 - distance / totalWeight) : null,
+    considered: used,
   };
 }
 
@@ -232,13 +250,16 @@ function scoreAgainstCatalog(build, catalog, topN = 5) {
     const p = playerToVector(player);
     const { score, coverage, consideredAttributes } = cosine(b, p, weights);
     const closeness = absoluteCloseness(b, p, weights);
+    const movement = movementSimilarity(b, p);
     const physical = physicalSimilarity(build, player);
     const positionFit = positionSimilarity(build.position, player);
     const capDependence = capBreakerDependence(build);
+    const generalAttributes = (score * 0.45) + (closeness.score * 0.55);
     const components = [
-      { value: (score * 0.45) + (closeness.score * 0.55), weight: 0.65 },
-      { value: physical.score, weight: 0.2 },
+      { value: movement.score, weight: 0.5 },
+      { value: physical.score, weight: 0.25 },
       { value: positionFit, weight: 0.15 },
+      { value: generalAttributes, weight: 0.1 },
     ].filter((x) => x.value !== null);
     const totalWeight = components.reduce((sum, x) => sum + x.weight, 0);
     const profileScore = components.reduce((sum, x) => sum + x.value * x.weight, 0) / totalWeight;
@@ -250,6 +271,8 @@ function scoreAgainstCatalog(build, catalog, topN = 5) {
       attributeSimilarity: +(((score * 0.45) + (closeness.score * 0.55)) * 100).toFixed(2),
       profileShapeSimilarity: +(score * 100).toFixed(2),
       exactAttributeSimilarity: +(closeness.score * 100).toFixed(2),
+      movementSimilarity: movement.score === null ? null : +(movement.score * 100).toFixed(2),
+      movementAttributes: movement.considered,
       physicalSimilarity: physical.score === null ? null : +(physical.score * 100).toFixed(2),
       positionFit: positionFit === null ? null : +(positionFit * 100).toFixed(2),
       capBreakerDependence: capDependence === null ? null : +(capDependence * 100).toFixed(2),

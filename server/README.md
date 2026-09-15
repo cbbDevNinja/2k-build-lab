@@ -1,3 +1,4 @@
+Response includes top player matches and a composite similarity score. The headline prioritizes movement (Ball Handle, Speed With Ball, Speed, Agility, and Vertical), then body profile and position fit. General attribute closeness remains visible, so gaps such as Driving Dunk 94 versus 75 are still reported without dominating a movement-focused comparison. `capBreakerDependence` is reported separately so a build that only resembles the player after breakers is visible.
 # Server-side Protection Setup
 
 This API is the first step to protecting valuable logic by keeping it off the client.
