@@ -41,7 +41,7 @@ const ROLE_WEIGHTS = {
 
 const POSITION_NAMES = ["PG", "SG", "SF", "PF", "C"];
 const PHYSICAL_KEYS = ["height", "weight", "wingspan"];
-const MOVEMENT_WEIGHTS = { 9: 1.4, 10: 1.4, 17: 1.1, 18: 1.1, 20: 0.8 };
+const MOVEMENT_WEIGHTS = { 9: 2.4, 10: 1.4, 17: 1.1, 18: 1.1, 20: 0.8 };
 
 const protoCatalog = [
   { name: "Tyrese Haliburton", position: "PG", attrs: [55, 72, 55, 30, 35, 86, 89, 75, 92, 88, 84, 45, 72, 65, 40, 35, 45, 82, 82, 45, 72] },
