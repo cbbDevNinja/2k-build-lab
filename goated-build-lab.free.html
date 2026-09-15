@@ -227,6 +227,19 @@
                         <span class="pot-num mono" id="ovr2">25</span>
                     </div>
                 </section>
+                <section class="sheet day-one" aria-label="Day-one check and player comparison">
+                    <div class="sheet-head">
+                        <h2>Day-one check</h2>
+                        <span class="hint" id="dayOneStatus">Waiting for server check</span>
+                    </div>
+                    <p class="day-one-copy">Badge-free pre-game check at the current build rating. Player comparisons are optional and use a separate request.</p>
+                    <div class="day-one-gates" id="dayOneGates"></div>
+                    <div class="day-one-actions">
+                        <button type="button" class="go" id="comparePlayers">Compare to players</button>
+                        <span class="hint" id="similarityStatus"></span>
+                    </div>
+                    <div class="similarity-list" id="similarityList"></div>
+                </section>
                 <!-- THE GAP UNDER THE BOARD. `.work` is `minmax(0,1fr) 318px` with
          align-items:start, so whenever the rail outruns the attribute board
          the bottom of the left column is empty -- ~500px of black on a

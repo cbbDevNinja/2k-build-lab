@@ -1741,6 +1741,55 @@
                 flex-wrap: wrap
             }
 
+            .day-one-copy {
+                color: var(--ink-2);
+                margin: 14px 15px 12px;
+                max-width: 72ch;
+            }
+
+            .day-one-gates {
+                display: grid;
+                gap: 6px;
+                grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+                padding: 0 15px;
+            }
+
+            .day-one-gate {
+                background: var(--raise);
+                border: 1px solid var(--line-2);
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 8px 10px;
+            }
+
+            .day-one-gate.pass strong { color: var(--cyan); }
+            .day-one-gate.fail strong { color: var(--rose); }
+
+            .day-one-actions {
+                align-items: center;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin: 14px 15px 0;
+            }
+
+            .similarity-list {
+                display: grid;
+                gap: 6px;
+                margin: 12px 15px 15px;
+            }
+
+            .similarity-row {
+                border-top: 1px solid var(--line-2);
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 10px;
+                padding-top: 7px;
+            }
+
+            .similarity-row small { color: var(--ink-2); }
+
             .hrow {
                 display: flex;
                 gap: 6px;

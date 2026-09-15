@@ -45,6 +45,8 @@
                   , SERVER_T = 0
                   , SERVER_SEQ = 0
                                     , SERVER_METRICS = null
+                  , DAY_ONE_RESULT = null
+                  , LAST_SERVER_PAYLOAD = null
                   , SHEET_HINT_BASE = '';
 
                 function sumBreakers() {
@@ -73,6 +75,7 @@
                         bodyCaps: caps.slice(),
                         capBreakers: sumBreakers()
                     };
+                    LAST_SERVER_PAYLOAD = payload;
                     var sig = payload.attributes.join('.') + '|' + payload.finalAttributes.join('.') + '|' + payload.bodyCaps.join('.') + '|' + payload.bodyHb + '|' + payload.capBreakers + '|' + payload.position + '|' + payload.heightIn + '|' + payload.weightLb + '|' + payload.wingspanIn;
                     if (sig === SERVER_SIG)
                         return;
@@ -96,6 +99,7 @@
                                 modelVersion: r.modelVersion || ''
                             };
                             var d1 = rsp && rsp.dayOne;
+                            DAY_ONE_RESULT = d1 || null;
                             DAY_ONE_NOTE = d1 && typeof d1.passed === 'boolean' ? (' \u00b7 day one ' + (d1.passed ? 'PASS' : 'FAIL')) : '';
                             SERVER_NOTE = ' \u00b7 server overall ' + Number(r.engine.overallAlloc).toFixed(0) + ' / raw ' + Number(r.engine.rawAlloc).toFixed(4) + (r.modelVersion ? (' (' + r.modelVersion + ')') : '');
                             $('sheetHint').textContent = SHEET_HINT_BASE + DAY_ONE_NOTE + SERVER_NOTE;
@@ -104,6 +108,7 @@
                             if (seq !== SERVER_SEQ)
                                 return;
                             DAY_ONE_NOTE = '';
+                            DAY_ONE_RESULT = null;
                             SERVER_NOTE = '';
                             SERVER_METRICS = null;
                         });
@@ -2278,6 +2283,43 @@
                         paintAnimBox(vals, h);
                     $('codeOut').textContent = buildCode();
                     scheduleServerEval(B, hb, caps, vals);
+                    paintDayOne();
+                }
+
+                function paintDayOne() {
+                    var status = $('dayOneStatus'), gates = $('dayOneGates');
+                    if (!status || !gates)
+                        return;
+                    if (!DAY_ONE_RESULT) {
+                        status.textContent = 'Waiting for server check';
+                        gates.innerHTML = '';
+                        return;
+                    }
+                    status.textContent = DAY_ONE_RESULT.passed ? 'PASS' : 'FAIL';
+                    gates.innerHTML = (DAY_ONE_RESULT.gates || []).map(function(g) {
+                        return '<div class="day-one-gate ' + (g.pass ? 'pass' : 'fail') + '"><span>' + esc(g.label) + '</span><strong>' + (g.pass ? 'PASS' : 'FAIL') + '</strong></div>';
+                    }).join('');
+                }
+
+                function comparePlayers() {
+                    var button = $('comparePlayers'), status = $('similarityStatus'), list = $('similarityList');
+                    if (!button || !status || !list || !LAST_SERVER_PAYLOAD || !window.GBLApi || !window.GBLApi.similarity)
+                        return;
+                    button.disabled = true;
+                    status.textContent = 'Comparing...';
+                    list.innerHTML = '';
+                    window.GBLApi.similarity({ attributes: LAST_SERVER_PAYLOAD.attributes, topN: 5 }).then(function(rsp) {
+                        var sim = rsp && rsp.similarity;
+                        var matches = sim && sim.matches || [];
+                        status.textContent = sim ? ('source: ' + sim.source) : 'No comparison available';
+                        list.innerHTML = matches.map(function(m) {
+                            return '<div class="similarity-row"><span><b>' + esc(m.name) + '</b> <small>' + esc(m.position || '') + '</small></span><strong>' + Number(m.similarity).toFixed(1) + '%</strong></div>';
+                        }).join('');
+                    }).catch(function(err) {
+                        status.textContent = err && err.message ? err.message : 'Comparison unavailable';
+                    }).then(function() {
+                        button.disabled = false;
+                    });
                 }
 
                 function renderTokens(v) {
@@ -2949,6 +2991,7 @@
                 }
                 $('undo').addEventListener('click', undo);
                 $('redo').addEventListener('click', redo);
+                $('comparePlayers').addEventListener('click', comparePlayers);
                 window.addEventListener('keydown', function(e) {
                     var tag = (e.target && e.target.tagName || '').toLowerCase();
                     if (tag === 'input' || tag === 'textarea' || tag === 'select')
