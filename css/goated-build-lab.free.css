@@ -1848,6 +1848,33 @@
                 padding-top: 8px;
             }
 
+            .comparison-attributes {
+                border-top: 1px solid var(--line-2);
+                margin-top: 10px;
+                padding-top: 8px;
+            }
+
+            .comparison-attributes summary {
+                color: var(--cyan);
+                cursor: pointer;
+                font-size: 12px;
+            }
+
+            .comparison-attribute-row {
+                align-items: center;
+                border-top: 1px solid var(--line-2);
+                display: grid;
+                font-size: 11px;
+                gap: 6px;
+                grid-template-columns: 1fr 34px 34px 42px;
+                margin-top: 5px;
+                padding-top: 5px;
+            }
+
+            .comparison-attribute-row.mismatch { color: var(--amber); }
+            .comparison-attribute-row.missing { color: var(--ink-3); }
+            .comparison-attribute-row small { color: var(--ink-2); }
+
             .hrow {
                 display: flex;
                 gap: 6px;

@@ -24,6 +24,13 @@ const ATTR_KEYS = [
   ["vertical"],
 ];
 
+const ATTR_LABELS = [
+  "Close Shot", "Driving Layup", "Driving Dunk", "Standing Dunk", "Post Control",
+  "Mid-Range", "Three-Point", "Free Throw", "Pass Accuracy", "Ball Handle",
+  "Speed With Ball", "Interior Defense", "Perimeter Defense", "Steal", "Block",
+  "Offensive Rebound", "Defensive Rebound", "Speed", "Agility", "Strength", "Vertical",
+];
+
 const ROLE_WEIGHTS = {
   PG: [0.7, 1.25, 1.05, 0.3, 0.2, 0.9, 0.95, 0.5, 1.15, 1.35, 1.3, 0.3, 0.9, 0.55, 0.2, 0.2, 0.2, 1.25, 1.15, 0.45, 1.0],
   SG: [0.7, 1.1, 1.0, 0.3, 0.2, 1.0, 1.15, 0.5, 0.95, 1.25, 1.2, 0.35, 1.0, 0.7, 0.25, 0.25, 0.25, 1.2, 1.1, 0.55, 1.0],
@@ -166,6 +173,33 @@ function playerToVector(player) {
   return ATTR_KEYS.map((aliases) => normalizeAttr(getByAliases(attrs, aliases)));
 }
 
+function playerToRawVector(player) {
+  if (Array.isArray(player?.attrs) && player.attrs.length === 21) {
+    return player.attrs.map((v) => num(v));
+  }
+  if (Array.isArray(player?.attributes) && player.attributes.length === 21) {
+    return player.attributes.map((v) => num(v));
+  }
+  const attrs = player.attributes && typeof player.attributes === "object" ? player.attributes : player;
+  return ATTR_KEYS.map((aliases) => getByAliases(attrs, aliases));
+}
+
+function attributeBreakdown(buildAttributes, player) {
+  const buildValues = buildAttributes.map((v) => num(v));
+  const playerValues = playerToRawVector(player);
+  return ATTR_LABELS.map((label, index) => {
+    const buildValue = buildValues[index];
+    const playerValue = playerValues[index];
+    return {
+      label,
+      build: Number.isFinite(buildValue) ? buildValue : null,
+      player: Number.isFinite(playerValue) ? playerValue : null,
+      difference: Number.isFinite(buildValue) && Number.isFinite(playerValue) ? buildValue - playerValue : null,
+      matches: Number.isFinite(buildValue) && Number.isFinite(playerValue) && buildValue === playerValue,
+    };
+  });
+}
+
 function buildVector(attributes) {
   return attributes.map((v) => normalizeAttr(num(v)));
 }
@@ -202,6 +236,7 @@ function scoreAgainstCatalog(build, catalog, topN = 5) {
       confidence: +(Math.min(1, consideredAttributes / 21) * 100).toFixed(1),
       coverage: +(coverage * 100).toFixed(1),
       consideredAttributes,
+      attributes: attributeBreakdown(attributes, player),
     });
   }
 

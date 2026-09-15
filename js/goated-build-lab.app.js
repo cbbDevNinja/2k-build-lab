@@ -2328,7 +2328,13 @@
                             return '<div class="comparison-meter"><span>' + label + '</span><span class="comparison-meter-track"><i class="comparison-meter-fill" style="width:' + score + '%"></i></span><b>' + score.toFixed(0) + '%</b></div>';
                         }
                         visual.innerHTML = matches.slice(0, 3).map(function(m) {
-                            return '<article class="comparison-card"><div class="comparison-card-head"><span><b>' + esc(m.name) + '</b><br><small>' + esc(m.position || '') + ' · ' + (m.consideredAttributes || 0) + '/21 shared attributes</small></span><strong>' + Number(m.similarity).toFixed(0) + '%</strong></div>' + meter('Attributes', m.attributeSimilarity) + meter('Body', m.physicalSimilarity) + meter('Position', m.positionFit) + meter('Breakers', m.capBreakerDependence === null ? null : 100 - Number(m.capBreakerDependence)) + '<p class="comparison-animation-note">Animations: player package not mapped. Build animation eligibility is checked separately in the Animations panel.</p></article>';
+                            var rows = (m.attributes || []).map(function(a) {
+                                var missing = a.build === null || a.player === null;
+                                var cls = missing ? 'missing' : (a.matches ? '' : 'mismatch');
+                                var delta = a.difference === null ? '--' : (a.difference > 0 ? '+' : '') + a.difference;
+                                return '<div class="comparison-attribute-row ' + cls + '"><span>' + esc(a.label) + '</span><b>' + (a.build === null ? '--' : a.build) + '</b><b>' + (a.player === null ? '--' : a.player) + '</b><small>' + delta + '</small></div>';
+                            }).join('');
+                            return '<article class="comparison-card"><div class="comparison-card-head"><span><b>' + esc(m.name) + '</b><br><small>' + esc(m.position || '') + ' · ' + (m.consideredAttributes || 0) + '/21 shared attributes</small></span><strong>' + Number(m.similarity).toFixed(0) + '%</strong></div>' + meter('Attributes', m.attributeSimilarity) + meter('Body', m.physicalSimilarity) + meter('Position', m.positionFit) + meter('Breakers', m.capBreakerDependence === null ? null : 100 - Number(m.capBreakerDependence)) + '<details class="comparison-attributes"><summary>View all attributes</summary><div class="comparison-attribute-row"><span>Attribute</span><b>You</b><b>Player</b><small>Diff</small></div>' + rows + '</details><p class="comparison-animation-note">Animations: player package not mapped. Build animation eligibility is checked separately in the Animations panel.</p></article>';
                         }).join('');
                         list.innerHTML = matches.map(function(m) {
                             var detail = 'attributes ' + Number(m.attributeSimilarity || m.similarity).toFixed(1) + '%';
