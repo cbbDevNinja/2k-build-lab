@@ -4550,16 +4550,18 @@
                         }
                     });
 
-                    if (mode === 'meta')
-                        v = badgeFill(v, hb, caps, skip, buy, (ptPin === undefined || ptPin === null) ? null : ptPin);
-                    if (ptPin === undefined || ptPin === null)
-                        fillToWall(v, hb, caps, skip, buy);
-                    else {
-                        var vt = fillToType(v, hb, caps, skip, ptPin, buy);
-                        if (!vt)
-                            return null;
-                        // the type never materialised
-                        v = vt;
+                    if (!spec.dayOne) {
+                        if (mode === 'meta')
+                            v = badgeFill(v, hb, caps, skip, buy, (ptPin === undefined || ptPin === null) ? null : ptPin);
+                        if (ptPin === undefined || ptPin === null)
+                            fillToWall(v, hb, caps, skip, buy);
+                        else {
+                            var vt = fillToType(v, hb, caps, skip, ptPin, buy);
+                            if (!vt)
+                                return null;
+                            // the type never materialised
+                            v = vt;
+                        }
                     }
 
                     /* FINISH THE BUILD. With one group ticked, everything else sits at its low
@@ -4584,7 +4586,7 @@
      build away. Unpinned runs pass null and behave exactly as before. */
                     var hold = (ptPin === undefined || ptPin === null) ? null : ptPin;
                     var lastBuy = buy;
-                    for (var L = 0; L < RELAX.length && ratingOf(v, hb) < WALL - 0.1; L++) {
+                    for (var L = 0; !spec.dayOne && L < RELAX.length && ratingOf(v, hb) < WALL - 0.1; L++) {
                         var buy2 = buy.slice();
                         for (i = 0; i < 21; i++) {
                             if (P.gid[i] === 'post' || P.gid[i] === 'str' || P.gid[i] === 'cls')
@@ -4604,9 +4606,11 @@
      even though nothing useful fits. Seen live on the first run of this
      finder. Pour the crumbs into Free Throw first -- no badge reads it, so it
      costs the build nothing -- and only then into anything at all. */
-                    var crumb = lastBuy.slice();
-                    crumb[7] = caps[7];
-                    fillToWall(v, hb, caps, skip, crumb, hold);
+                    if (!spec.dayOne) {
+                        var crumb = lastBuy.slice();
+                        crumb[7] = caps[7];
+                        fillToWall(v, hb, caps, skip, crumb, hold);
+                    }
                     /* ...and PARKED attributes too. Skipping them left one point of room on a
      parked Def Rebound and the build read 98 (13 of 40 results on one brief).
      Buying crumbs back into a park costs nothing here: every other attribute
@@ -4617,10 +4621,12 @@
      "exact" ask is the one thing it may not spend into: the user named that
      number, and a build reading 98 with the number they asked for is a better
      answer than 99 with a number they did not. */
-                    var soak = caps.slice();
-                    for (var se in exactA)
-                        soak[+se] = Math.min(soak[+se], exactA[se]);
-                    fillToWall(v, hb, caps, {}, soak, hold);
+                    if (!spec.dayOne) {
+                        var soak = caps.slice();
+                        for (var se in exactA)
+                            soak[+se] = Math.min(soak[+se], exactA[se]);
+                        fillToWall(v, hb, caps, {}, soak, hold);
+                    }
 
                     /* The parks were priced on a HYPOTHESIS about the player type. The game uses
      the type of the finished allocation, so re-derive it. A NAMED floor the
@@ -4965,6 +4971,10 @@
                         finish();
                     }
                     function finish() {
+                        if (spec.dayOne)
+                            out = out.filter(function(r) {
+                                return dayOneCandidatePass(r, spec.pos);
+                            });
                         out.sort(function(x, y) {
                             return (y.met - x.met) || ((y.ex || 0) - (x.ex || 0)) || ((y.points + y.gain) - (x.points + x.gain));
                         });
@@ -4992,6 +5002,74 @@
                     }
                     chunk();
                 }
+
+                function dayOneCandidatePass(r, pos) {
+                    var v = r.after || r.alloc;
+                    if (!v || v.length !== 21 || Number(r.ovr) > 85)
+                        return false;
+                    var shot = v[6] >= 80 || v[5] >= 82 || v[1] >= 80 || v[2] >= 80;
+                    var ball = v[9] >= 75 && v[10] >= 72 && v[8] >= 70;
+                    var defense = v[12] >= 75 && v[17] >= 78 && v[18] >= 75;
+                    var physical = v[17] >= 78 && v[18] >= 75 && v[20] >= 65;
+                    var groups = [
+                        (v[0] + v[1] + v[2] + v[3] + v[4]) / 5,
+                        (v[5] + v[6] + v[7]) / 3,
+                        (v[8] + v[9] + v[10]) / 3,
+                        (v[11] + v[12] + v[13] + v[14]) / 4,
+                        (v[15] + v[16]) / 2,
+                        (v[17] + v[18] + v[19] + v[20]) / 4
+                    ].sort(function(a, b) { return b - a; });
+                    return shot && ball && defense && physical && groups[0] >= 67.9 && groups[0] - groups[1] >= 4.44;
+                }
+
+                function dayOneSpec() {
+                    var pos = +$('fPos').value;
+                    var band = $('fHt').value;
+                    var hmin = null, hmax = null;
+                    if (band) {
+                        var parts = band.split('-');
+                        hmin = +parts[0];
+                        hmax = +parts[1];
+                    }
+                    return normSpec({
+                        pos: POSN[pos],
+                        caps: 0,
+                        good: [],
+                        excel: [],
+                        attrs: {
+                            'Three-Point': 80,
+                            'Ball Handle': 75,
+                            'Speed w/ Ball': 72,
+                            'Pass Accuracy': 70,
+                            'Perimeter D': 75,
+                            'Speed': 78,
+                            'Agility': 75,
+                            'Vertical': 65
+                        },
+                        fmode: {
+                            'Three-Point': 'stock',
+                            'Ball Handle': 'stock',
+                            'Speed w/ Ball': 'stock',
+                            'Pass Accuracy': 'stock',
+                            'Perimeter D': 'stock',
+                            'Speed': 'stock',
+                            'Agility': 'stock',
+                            'Vertical': 'stock'
+                        },
+                        alt: {},
+                        hmin: hmin,
+                        hmax: hmax,
+                        dayOne: true
+                    });
+                }
+
+                $('dayOneFind').addEventListener('click', function() {
+                    if (BUSY)
+                        return;
+                    var sp = dayOneSpec();
+                    say('Searching for a badge-free build that passes every day-one gate at 85 OVR...');
+                    search(sp);
+                });
 
                 /* \u2500\u2500 the one model call \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
                 /* caps is OPTIONAL in the parse -- omitting it means auto, and the finder
@@ -5218,6 +5296,7 @@
                         attrs: {},
                         fmode: {},
                         alt: {},
+                        dayOne: !!s.dayOne,
                         hmin: 0,
                         hmax: 99
                     };
@@ -6115,6 +6194,13 @@
                         busy('go', false);
                         $('goTick').disabled = false;
                         if (!res.length) {
+                            if (sp.dayOne) {
+                                RESULTS = [];
+                                $('alts').innerHTML = '';
+                                $('sortby').hidden = true;
+                                say('No build in the selected frame range passed every day-one gate at 85 OVR. Try another position, height, or wider height range.', 'warn');
+                                return;
+                            }
                             /* Nothing fits the preferred numbers. If the user gave second choices,
          that is exactly the case they gave them for -- try once more before
          telling them it cannot be done. */
@@ -6184,7 +6270,8 @@
                         }
                         var baseSummary = r.needs ? ('base build needs ' + r.needs + ' cap breaker' + (r.needs === 1 ? '' : 's') + ' to reach the target') : 'base build reaches the target';
                         var capSummary = r.gain ? ('cap breakers add +' + r.gain + ' attribute points') : 'cap breakers add nothing yet';
-                        say('<b>' + RESULTS.length + '</b> builds \u00b7 best meets <b>' + r.met + ' of ' + r.live + '</b>' + (sp.auto && r.needs != null ? (' \u00b7 <b>' + baseSummary + '</b> \u00b7 ' + capSummary) : '') + extra + (r.missed && r.missed.length ? (' \u00b7 missed ' + esc(r.missed.slice(0, 3).join(', ')) + (r.missed.length > 3 ? ' \u2026' : '')) : '') + (imp > 0 ? (' \u00b7 ' + imp + ' impossible on any ' + POSN[sp.pos] + ' frame') : '') + ' \u2014 loaded below, every slider still live.');
+                        var dayOneSummary = sp.dayOne ? ' \u00b7 <b>all pass the day-one gates at 85 OVR</b>' : '';
+                        say('<b>' + RESULTS.length + '</b> builds \u00b7 best meets <b>' + r.met + ' of ' + r.live + '</b>' + dayOneSummary + (sp.auto && r.needs != null ? (' \u00b7 <b>' + baseSummary + '</b> \u00b7 ' + capSummary) : '') + extra + (r.missed && r.missed.length ? (' \u00b7 missed ' + esc(r.missed.slice(0, 3).join(', ')) + (r.missed.length > 3 ? ' \u2026' : '')) : '') + (imp > 0 ? (' \u00b7 ' + imp + ' impossible on any ' + POSN[sp.pos] + ' frame') : '') + ' \u2014 loaded below, every slider still live.');
                     });
                 }
                 function findBuild() {
