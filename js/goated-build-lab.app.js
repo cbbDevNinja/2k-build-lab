@@ -5368,7 +5368,7 @@
                 var MAXFLOORS = 10;
                 function fModes() {
                     if (!FMODES)
-                        FMODES = [['any', 'either way'], ['stock', 'stock in builder'], ['caps', 'achieve with caps'], ['exact', 'exactly this, no higher'], ['from', 'start here, break up']];
+                        FMODES = [['any', 'base or cap-breaker result'], ['stock', 'base build must reach it'], ['caps', 'cap breakers may reach it'], ['exact', 'exactly this, no higher'], ['from', 'start here, then improve it']];
                     return FMODES;
                 }
                 var FLOORS;
@@ -6139,7 +6139,9 @@
                             if (got > paid)
                                 extra += ' \u00b7 <b>' + fn + ' ' + paid + '\u2192' + got + '</b>, ' + (got - paid) + ' points you never bought';
                         }
-                        say('<b>' + RESULTS.length + '</b> builds \u00b7 best meets <b>' + r.met + ' of ' + r.live + '</b>' + (sp.auto && r.needs != null ? (r.needs ? (' \u00b7 needs <b>' + r.needs + '</b> cap breaker' + (r.needs === 1 ? '' : 's')) : ' \u00b7 <b>no cap breakers needed</b>') : '') + (r.gain ? (' \u00b7 <b>+' + r.gain + '</b> attribute points from cap breakers') : '') + extra + (r.missed && r.missed.length ? (' \u00b7 missed ' + esc(r.missed.slice(0, 3).join(', ')) + (r.missed.length > 3 ? ' \u2026' : '')) : '') + (imp > 0 ? (' \u00b7 ' + imp + ' impossible on any ' + POSN[sp.pos] + ' frame') : '') + ' \u2014 loaded below, every slider still live.');
+                        var baseSummary = r.needs ? ('base build needs ' + r.needs + ' cap breaker' + (r.needs === 1 ? '' : 's') + ' to reach the target') : 'base build reaches the target';
+                        var capSummary = r.gain ? ('cap breakers add +' + r.gain + ' attribute points') : 'cap breakers add nothing yet';
+                        say('<b>' + RESULTS.length + '</b> builds \u00b7 best meets <b>' + r.met + ' of ' + r.live + '</b>' + (sp.auto && r.needs != null ? (' \u00b7 <b>' + baseSummary + '</b> \u00b7 ' + capSummary) : '') + extra + (r.missed && r.missed.length ? (' \u00b7 missed ' + esc(r.missed.slice(0, 3).join(', ')) + (r.missed.length > 3 ? ' \u2026' : '')) : '') + (imp > 0 ? (' \u00b7 ' + imp + ' impossible on any ' + POSN[sp.pos] + ' frame') : '') + ' \u2014 loaded below, every slider still live.');
                     });
                 }
                 function findBuild() {
