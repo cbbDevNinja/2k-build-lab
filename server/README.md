@@ -64,7 +64,7 @@ Body:
 
 `{"attributes":[...21 values...],"topN":5}`
 
-Response includes top player matches and similarity score.
+Response includes top player matches and a composite similarity score. The composite combines role-weighted attribute similarity, physical profile similarity, and position fit. `capBreakerDependence` is reported separately so a build that only resembles the player after breakers is visible.
 
 Missing or invalid player attributes are excluded from the score rather than treated as zero. Each match also reports `consideredAttributes` and `coverage`, so a high score with incomplete source data is visible.
 

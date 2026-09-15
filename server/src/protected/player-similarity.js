@@ -24,6 +24,17 @@ const ATTR_KEYS = [
   ["vertical"],
 ];
 
+const ROLE_WEIGHTS = {
+  PG: [0.7, 1.25, 1.05, 0.3, 0.2, 0.9, 0.95, 0.5, 1.15, 1.35, 1.3, 0.3, 0.9, 0.55, 0.2, 0.2, 0.2, 1.25, 1.15, 0.45, 1.0],
+  SG: [0.7, 1.1, 1.0, 0.3, 0.2, 1.0, 1.15, 0.5, 0.95, 1.25, 1.2, 0.35, 1.0, 0.7, 0.25, 0.25, 0.25, 1.2, 1.1, 0.55, 1.0],
+  SF: [0.85, 1.0, 1.0, 0.45, 0.35, 1.0, 1.0, 0.5, 0.85, 0.95, 0.9, 0.75, 1.0, 0.8, 0.75, 0.7, 0.8, 1.0, 0.95, 0.85, 0.95],
+  PF: [0.9, 0.85, 0.9, 0.9, 0.9, 0.8, 0.8, 0.4, 0.75, 0.65, 0.55, 1.0, 0.75, 0.55, 1.0, 1.0, 1.1, 0.85, 0.75, 1.15, 0.9],
+  C: [0.95, 0.75, 0.8, 1.0, 1.15, 0.65, 0.65, 0.35, 0.7, 0.45, 0.3, 1.15, 0.55, 0.4, 1.15, 1.1, 1.2, 0.65, 0.5, 1.2, 0.75],
+};
+
+const POSITION_NAMES = ["PG", "SG", "SF", "PF", "C"];
+const PHYSICAL_KEYS = ["height", "weight", "wingspan"];
+
 const protoCatalog = [
   { name: "Tyrese Haliburton", position: "PG", attrs: [55, 72, 55, 30, 35, 86, 89, 75, 92, 88, 84, 45, 72, 65, 40, 35, 45, 82, 82, 45, 72] },
   { name: "Desmond Bane", position: "SG", attrs: [62, 74, 65, 35, 45, 86, 88, 72, 78, 84, 78, 52, 84, 75, 45, 48, 55, 80, 78, 63, 74] },
@@ -53,6 +64,7 @@ function recordExternalRequest(now) {
 }
 
 function num(v) {
+  if (v == null || String(v).trim() === "") return NaN;
   const n = Number(v);
   return Number.isFinite(n) ? n : NaN;
 }
@@ -62,7 +74,7 @@ function normalizeAttr(v) {
   return Math.max(0, Math.min(1, (v - 25) / 74));
 }
 
-function cosine(a, b) {
+function cosine(a, b, weights) {
   let dot = 0;
   let na = 0;
   let nb = 0;
@@ -71,9 +83,10 @@ function cosine(a, b) {
     const av = a[i];
     const bv = b[i];
     if (!Number.isFinite(av) || !Number.isFinite(bv)) continue;
-    dot += av * bv;
-    na += av * av;
-    nb += bv * bv;
+    const weight = weights?.[i] || 1;
+    dot += weight * av * bv;
+    na += weight * av * av;
+    nb += weight * bv * bv;
     used += 1;
   }
   if (!used || !na || !nb) return { score: 0, coverage: 0, consideredAttributes: used };
@@ -95,6 +108,53 @@ function getByAliases(obj, aliases) {
   return NaN;
 }
 
+function parseLength(value) {
+  if (typeof value === "number") return value;
+  const text = String(value || "").trim();
+  const feet = text.match(/(\d+)\s*['′]/);
+  const inches = text.match(/(?:['′]\s*)(\d+(?:\.\d+)?)\s*["″]?/);
+  if (feet) return Number(feet[1]) * 12 + (inches ? Number(inches[1]) : 0);
+  return num(text.replace(/[^0-9.]/g, ""));
+}
+
+function parseWeight(value) {
+  return num(String(value || "").replace(/[^0-9.]/g, ""));
+}
+
+function physicalSimilarity(build, player) {
+  const playerValues = [parseLength(player.height), parseWeight(player.weight), parseLength(player.wingspan)];
+  const buildValues = [num(build.heightIn), num(build.weightLb), num(build.wingspanIn)];
+  const ranges = [12, 80, 18];
+  let total = 0;
+  let used = 0;
+  for (let i = 0; i < PHYSICAL_KEYS.length; i++) {
+    if (!Number.isFinite(playerValues[i]) || !Number.isFinite(buildValues[i])) continue;
+    total += Math.max(0, 1 - Math.abs(playerValues[i] - buildValues[i]) / ranges[i]);
+    used += 1;
+  }
+  return { score: used ? total / used : null, considered: used };
+}
+
+function positionSimilarity(buildPosition, player) {
+  if (!Number.isInteger(buildPosition) || buildPosition < 0 || buildPosition > 4) return null;
+  const buildPos = POSITION_NAMES[buildPosition];
+  const positions = Array.isArray(player.positions) ? player.positions : player.position ? [player.position] : [];
+  if (!positions.length) return null;
+  if (positions.includes(buildPos)) return 1;
+  const guard = ["PG", "SG"].includes(buildPos) && positions.some((p) => ["PG", "SG"].includes(p));
+  const wing = ["SF", "PF"].includes(buildPos) && positions.some((p) => ["SF", "PF"].includes(p));
+  return guard || wing ? 0.65 : 0;
+}
+
+function capBreakerDependence(build) {
+  const base = Array.isArray(build.attributes) ? build.attributes : [];
+  const final = Array.isArray(build.finalAttributes) ? build.finalAttributes : base;
+  if (base.length !== 21 || final.length !== 21) return null;
+  let gained = 0;
+  for (let i = 0; i < 21; i++) gained += Math.max(0, Number(final[i]) - Number(base[i]));
+  return Math.max(0, Math.min(1, gained / 35));
+}
+
 function playerToVector(player) {
   if (Array.isArray(player?.attrs) && player.attrs.length === 21) {
     return player.attrs.map((v) => normalizeAttr(num(v)));
@@ -110,18 +170,36 @@ function buildVector(attributes) {
   return attributes.map((v) => normalizeAttr(num(v)));
 }
 
-function scoreAgainstCatalog(attributes, catalog, topN = 5) {
+function scoreAgainstCatalog(build, catalog, topN = 5) {
+  const attributes = build.attributes;
   const b = buildVector(attributes);
+  const role = POSITION_NAMES[build.position];
+  const weights = ROLE_WEIGHTS[role] || null;
   const scored = [];
 
   for (const player of catalog) {
     const p = playerToVector(player);
-    const { score, coverage, consideredAttributes } = cosine(b, p);
+    const { score, coverage, consideredAttributes } = cosine(b, p, weights);
+    const physical = physicalSimilarity(build, player);
+    const positionFit = positionSimilarity(build.position, player);
+    const capDependence = capBreakerDependence(build);
+    const components = [
+      { value: score, weight: 0.65 },
+      { value: physical.score, weight: 0.2 },
+      { value: positionFit, weight: 0.15 },
+    ].filter((x) => x.value !== null);
+    const totalWeight = components.reduce((sum, x) => sum + x.weight, 0);
+    const profileScore = components.reduce((sum, x) => sum + x.value * x.weight, 0) / totalWeight;
     scored.push({
       name: player.name || player.playerName || "Unknown",
       position: player.positions?.join("/") || player.position || player.pos || "",
       team: player.team || player.teamName || "",
-      similarity: +(score * 100).toFixed(2),
+      similarity: +(profileScore * 100).toFixed(2),
+      attributeSimilarity: +(score * 100).toFixed(2),
+      physicalSimilarity: physical.score === null ? null : +(physical.score * 100).toFixed(2),
+      positionFit: positionFit === null ? null : +(positionFit * 100).toFixed(2),
+      capBreakerDependence: capDependence === null ? null : +(capDependence * 100).toFixed(2),
+      confidence: +(Math.min(1, consideredAttributes / 21) * 100).toFixed(1),
       coverage: +(coverage * 100).toFixed(1),
       consideredAttributes,
     });
@@ -179,20 +257,20 @@ async function fetchExternalCatalog() {
   }
 }
 
-export async function computeSimilarity({ attributes, topN }) {
+export async function computeSimilarity({ build, topN }) {
   const ext = await fetchExternalCatalog();
   if (ext.ok) {
     return {
       source: ext.source,
-      matches: scoreAgainstCatalog(attributes, ext.data, topN),
-      modelVersion: "similarity-v1",
+      matches: scoreAgainstCatalog(build, ext.data, topN),
+      modelVersion: "similarity-v2-composite",
     };
   }
 
   return {
     source: "fallback",
     fallbackReason: ext.reason,
-    matches: scoreAgainstCatalog(attributes, protoCatalog, topN),
-    modelVersion: "similarity-v1",
+    matches: scoreAgainstCatalog(build, protoCatalog, topN),
+    modelVersion: "similarity-v2-composite",
   };
 }

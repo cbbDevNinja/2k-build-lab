@@ -22,6 +22,11 @@ const BodySchema = z.object({
 
 const SimilarityBodySchema = z.object({
   attributes: z.array(z.number()).length(21),
+  finalAttributes: z.array(z.number()).length(21).optional(),
+  position: z.number().int().min(0).max(4).optional(),
+  heightIn: z.number().int().min(69).max(88).optional(),
+  weightLb: z.number().int().min(145).max(290).optional(),
+  wingspanIn: z.number().int().min(72).max(96).optional(),
   topN: z.number().int().min(1).max(10).optional(),
 });
 
@@ -48,7 +53,7 @@ export function solverRouter() {
       let similarity = null;
       if (parsed.data.includeSimilarity) {
         similarity = await computeSimilarity({
-          attributes: parsed.data.attributes,
+          build: parsed.data,
           topN: parsed.data.similarityTopN || 5,
         });
       }
@@ -72,7 +77,7 @@ export function solverRouter() {
 
     try {
       const similarity = await computeSimilarity({
-        attributes: parsed.data.attributes,
+        build: parsed.data,
         topN: parsed.data.topN || 5,
       });
       return res.json({ ok: true, auth: req.auth, similarity });

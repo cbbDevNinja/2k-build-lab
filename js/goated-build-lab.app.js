@@ -2308,12 +2308,24 @@
                     button.disabled = true;
                     status.textContent = 'Comparing...';
                     list.innerHTML = '';
-                    window.GBLApi.similarity({ attributes: LAST_SERVER_PAYLOAD.attributes, topN: 5 }).then(function(rsp) {
+                    window.GBLApi.similarity({
+                        attributes: LAST_SERVER_PAYLOAD.attributes,
+                        finalAttributes: LAST_SERVER_PAYLOAD.finalAttributes,
+                        position: LAST_SERVER_PAYLOAD.position,
+                        heightIn: LAST_SERVER_PAYLOAD.heightIn,
+                        weightLb: LAST_SERVER_PAYLOAD.weightLb,
+                        wingspanIn: LAST_SERVER_PAYLOAD.wingspanIn,
+                        topN: 5
+                    }).then(function(rsp) {
                         var sim = rsp && rsp.similarity;
                         var matches = sim && sim.matches || [];
                         status.textContent = sim ? ('source: ' + sim.source) : 'No comparison available';
                         list.innerHTML = matches.map(function(m) {
-                            return '<div class="similarity-row"><span><b>' + esc(m.name) + '</b> <small>' + esc(m.position || '') + '</small><br><small>based on ' + (m.consideredAttributes || 0) + '/21 shared attributes</small></span><strong>' + Number(m.similarity).toFixed(1) + '%</strong></div>';
+                            var detail = 'attributes ' + Number(m.attributeSimilarity || m.similarity).toFixed(1) + '%';
+                            if (m.physicalSimilarity !== null) detail += ' · body ' + Number(m.physicalSimilarity).toFixed(1) + '%';
+                            if (m.positionFit !== null) detail += ' · position ' + Number(m.positionFit).toFixed(0) + '%';
+                            if (m.capBreakerDependence !== null) detail += ' · breaker dependence ' + Number(m.capBreakerDependence).toFixed(0) + '%';
+                            return '<div class="similarity-row"><span><b>' + esc(m.name) + '</b> <small>' + esc(m.position || '') + '</small><br><small>' + detail + ' · based on ' + (m.consideredAttributes || 0) + '/21 shared attributes</small></span><strong>' + Number(m.similarity).toFixed(1) + '%</strong></div>';
                         }).join('');
                     }).catch(function(err) {
                         status.textContent = err && err.message ? err.message : 'Comparison unavailable';
