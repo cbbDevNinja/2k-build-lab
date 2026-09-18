@@ -11447,6 +11447,26 @@
                     return true;
                 }
 
+                function identityUpgradeText(v, caps) {
+                    var priorities = [[9, 'Ball Handle'], [10, 'Speed With Ball'], [17, 'Speed'], [18, 'Agility'], [20, 'Vertical']];
+                    var scoring = [[2, 'Driving Dunk'], [1, 'Driving Layup'], [6, 'Three-Point'], [5, 'Mid-Range']];
+                    scoring.sort(function(a, b) { return v[b[0]] - v[a[0]]; });
+                    priorities.push(scoring[0]);
+                    priorities.push([8, 'Pass Accuracy']);
+                    priorities.push([12, 'Perimeter Defense']);
+                    var steps = [];
+                    priorities.forEach(function(p) {
+                        if (steps.length >= 5 || v[p[0]] >= caps[p[0]])
+                            return;
+                        var current = v[p[0]];
+                        var target = current < 75 ? 75 : current < 80 ? 80 : current < 85 ? 85 : current < 90 ? 90 : caps[p[0]];
+                        target = Math.min(target, caps[p[0]]);
+                        if (target > current)
+                            steps.push('<b>' + (steps.length + 1) + '.</b> ' + esc(p[1]) + ' ' + current + '' + target);
+                    });
+                    return steps.length ? 'Upgrade path: ' + steps.join(' b7 ') + '. Keep Ball Handle and Speed With Ball ahead of secondary upgrades so the build keeps its identity.' : 'Upgrade path: movement and primary scoring attributes are already at their current body ceilings.';
+                }
+
                 function optimizeBuild() {
                     var B = clampBody()
                       , caps = ceilingsFor(B.h, B.w, B.ws);
@@ -11540,10 +11560,10 @@
                     var msg = $('optMsg');
                     if (pts1 === pts0 && gain.tiers === 0) {
                         msg.className = 'optmsg';
-                        msg.innerHTML = 'Already optimal under these rules \u2014 nothing could be added ' + 'or moved without crossing the 99 wall, dropping a badge tier, or changing ' + 'the player type.';
+                        msg.innerHTML = 'Already optimal under these rules \u2014 nothing could be added ' + 'or moved without crossing the 99 wall, dropping a badge tier, or changing ' + 'the player type.<br><span class="identity-roadmap">' + identityUpgradeText(alloc, caps) + '</span>';
                     } else {
                         msg.className = 'optmsg ok';
-                        msg.innerHTML = '<b>+' + (pts1 - pts0) + ' attribute points</b>' + (gain.tiers ? (' \u00b7 <b>+' + gain.tiers + '</b> badge tier' + (gain.tiers === 1 ? '' : 's')) : '') + ' \u00b7 player type held, so every cap breaker ladder is unchanged' + (keep ? (' \u00b7 name kept as <b>' + esc(name0) + '</b>') : (name1 !== name0 ? (' \u00b7 name is now <b>' + esc(name1 || 'unnamed') + '</b> (was ' + esc(name0 || 'unnamed') + ') \u2014 tick <b>Keep my build name</b> to hold it') : ''));
+                        msg.innerHTML = '<b>+' + (pts1 - pts0) + ' attribute points</b>' + (gain.tiers ? (' \u00b7 <b>+' + gain.tiers + '</b> badge tier' + (gain.tiers === 1 ? '' : 's')) : '') + ' \u00b7 player type held, so every cap breaker ladder is unchanged' + (keep ? (' \u00b7 name kept as <b>' + esc(name0) + '</b>') : (name1 !== name0 ? (' \u00b7 name is now <b>' + esc(name1 || 'unnamed') + '</b> (was ' + esc(name0 || 'unnamed') + ') \u2014 tick <b>Keep my build name</b> to hold it') : '')) + '<br><span class="identity-roadmap">' + identityUpgradeText(alloc, caps) + '</span>';
                     }
                     hidePrompt();
                     render();
