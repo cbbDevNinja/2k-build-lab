@@ -11462,10 +11462,127 @@
                         var target = current < 75 ? 75 : current < 80 ? 80 : current < 85 ? 85 : current < 90 ? 90 : caps[p[0]];
                         target = Math.min(target, caps[p[0]]);
                         if (target > current)
-                            steps.push('<b>' + (steps.length + 1) + '.</b> ' + esc(p[1]) + ' ' + current + '' + target);
+                            steps.push('<b>' + (steps.length + 1) + '.</b> ' + esc(p[1]) + ' ' + current + ' → ' + target);
                     });
-                    return steps.length ? 'Upgrade path: ' + steps.join(' b7 ') + '. Keep Ball Handle and Speed With Ball ahead of secondary upgrades so the build keeps its identity.' : 'Upgrade path: movement and primary scoring attributes are already at their current body ceilings.';
+                    return steps.length ? 'Upgrade path: ' + steps.join(' · ') + '. Keep Ball Handle and Speed With Ball ahead of secondary upgrades so the build keeps its identity.' : 'Upgrade path: movement and primary scoring attributes are already at their current body ceilings.';
                 }
+
+                function reduceToDayOneIdentity() {
+                    var B = clampBody()
+                      , caps = ceilingsFor(B.h, B.w, B.ws);
+                    var hb = Math.max(0, Math.min(30, B.h - 63));
+                    var pos = +$('pos').value;
+                    var current = alloc.slice();
+                    var pt0 = ptOf(current, hb)
+                      , name0 = nameOf(current, pos);
+                    var keep = KEEPNAME ? name0 : null;
+                    var msg = $('optMsg');
+                    var currentOvr = overallOf(current, hb, caps);
+                    if (currentOvr === 85) {
+                        msg.className = 'optmsg ok';
+                        msg.innerHTML = '<b>Already at 85 OVR</b> — this build already clears the day-one gate without losing identity.<br><span class="identity-roadmap">' + identityUpgradeText(current, caps) + '</span>';
+                        hidePrompt();
+                        render();
+                        return;
+                    }
+                    if (currentOvr < 85) {
+                        msg.className = 'optmsg';
+                        msg.innerHTML = 'This build is already below the 85 day-one line, so there is nothing to trim without moving it off its identity.<br><span class="identity-roadmap">' + identityUpgradeText(current, caps) + '</span>';
+                        hidePrompt();
+                        render();
+                        return;
+                    }
+                    var identityPenalty = function(a) {
+                        var core = [9, 10, 17, 18, 20];
+                        var shot = [2, 1, 6, 5];
+                        var support = [8, 12, 13, 14, 15, 16, 19, 11, 0, 3, 4, 7];
+                        if (core.indexOf(a) >= 0)
+                            return 0;
+                        if (shot.indexOf(a) >= 0)
+                            return 1;
+                        if (support.indexOf(a) >= 0)
+                            return 2;
+                        return 3;
+                    };
+                    var frontier = [{
+                        v: current.slice(),
+                        rank: 0
+                    }];
+                    var seen = {};
+                    var best = current.slice();
+                    var bestOvr = currentOvr;
+                    var bestDiff = Infinity;
+                    var finalTarget = null;
+                    while (frontier.length) {
+                        frontier.sort(function(x, y) {
+                            return x.rank - y.rank;
+                        });
+                        var state = frontier.shift();
+                        var v = state.v; 
+                        var ovr = overallOf(v, hb, caps);
+                        var diff = Math.abs(85 - ovr);
+                        if (ovr === 85) {
+                            best = v.slice();
+                            finalTarget = v.slice();
+                            break;
+                        }
+                        if (diff < bestDiff) {
+                            best = v.slice();
+                            bestOvr = ovr;
+                            bestDiff = diff;
+                        }
+                        if (ovr < 85)
+                            continue;
+                        var nexts = [];
+                        for (var a = 0; a < 21; a++) {
+                            if (v[a] <= 25 || LOCK[a])
+                                continue;
+                            var t = v.slice();
+                            t[a]--;
+                            settle(t, hb, caps);
+                            if (t.some(function(val, i) {
+                                return val > caps[i] || (LOCK[i] && val !== v[i]);
+                            }))
+                                continue;
+                            if (ptOf(t, hb) !== pt0)
+                                continue;
+                            if (keep && nameOf(t, pos) !== keep)
+                                continue;
+                            var nextOvr = overallOf(t, hb, caps);
+                            if (nextOvr > 99)
+                                continue;
+                            var score = nextOvr === 85 ? 0 : (nextOvr < 85 ? 900 + (85 - nextOvr) : Math.abs(85 - nextOvr) + 10 + identityPenalty(a));
+                            nexts.push({
+                                v: t,
+                                rank: score + identityPenalty(a) * 2
+                            });
+                        }
+                        nexts.sort(function(x, y) {
+                            return x.rank - y.rank;
+                        });
+                        nexts.forEach(function(item) {
+                            var key = item.v.join('.');
+                            if (seen[key])
+                                return;
+                            seen[key] = 1;
+                            frontier.push(item);
+                        });
+                    }
+                    if (!finalTarget)
+                        finalTarget = best;
+                    alloc = finalTarget.slice();
+                    var finalOvr = overallOf(alloc, hb, caps);
+                    if (finalOvr === 85) {
+                        msg.className = 'optmsg ok';
+                        msg.innerHTML = '<b>Reduced to 85 OVR</b> — same player type preserved, and the build keeps its movement identity by cutting from lower-priority attributes first.<br><span class="identity-roadmap">' + identityUpgradeText(alloc, caps) + '</span>';
+                    } else {
+                        msg.className = 'optmsg';
+                        msg.innerHTML = 'Exact 85 was not reachable while keeping the same type and name. The closest valid identity-preserving reduction was left on screen.<br><span class="identity-roadmap">' + identityUpgradeText(finalTarget, caps) + '</span>';
+                    }
+                    hidePrompt();
+                    render();
+                }
+
 
                 function optimizeBuild() {
                     var B = clampBody()
@@ -11569,6 +11686,7 @@
                     render();
                 }
                 $('optimize').addEventListener('click', optimizeBuild);
+                $('reduce85').addEventListener('click', reduceToDayOneIdentity);
 
                 /* \u2500\u2500 SEND TO 2K HQ \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
    Turn the build on screen into a real NBA 2K HQ import link.
