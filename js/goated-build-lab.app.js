@@ -11467,6 +11467,7 @@
                     return steps.length ? 'Upgrade path: ' + steps.join(' · ') + '. Keep Ball Handle and Speed With Ball ahead of secondary upgrades so the build keeps its identity.' : 'Upgrade path: movement and primary scoring attributes are already at their current body ceilings.';
                 }
 
+                var PRESERVE_MOVEMENT = true;
                 function reduceToDayOneIdentity() {
                     var B = clampBody()
                       , caps = ceilingsFor(B.h, B.w, B.ws);
@@ -11497,7 +11498,7 @@
                         var shot = [2, 1, 6, 5];
                         var support = [8, 12, 13, 14, 15, 16, 19, 11, 0, 3, 4, 7];
                         if (movementAttrs.indexOf(a) >= 0)
-                            return 100;
+                            return PRESERVE_MOVEMENT ? 100 : 20;
                         if (shot.indexOf(a) >= 0)
                             return 20;
                         if (support.indexOf(a) >= 0)
@@ -11535,7 +11536,7 @@
                             continue;
                         var nexts = [];
                         for (var a = 0; a < 21; a++) {
-                            if (v[a] <= 25 || LOCK[a] || movementAttrs.indexOf(a) >= 0)
+                            if (v[a] <= 25 || LOCK[a] || (PRESERVE_MOVEMENT && movementAttrs.indexOf(a) >= 0))
                                 continue;
                             var t = v.slice();
                             t[a]--;
@@ -11574,7 +11575,7 @@
                     var finalOvr = overallOf(alloc, hb, caps);
                     if (finalOvr === 85) {
                         msg.className = 'optmsg ok';
-                        msg.innerHTML = '<b>Reduced to 85 OVR</b> — same player type preserved, and the build keeps its movement identity by cutting from lower-priority attributes first.<br><span class="identity-roadmap">' + identityUpgradeText(alloc, caps) + '</span>';
+                        msg.innerHTML = '<b>Reduced to 85 OVR</b> — same player type preserved, with movement identity ' + (PRESERVE_MOVEMENT ? 'protected' : 'weighted first') + '.<br><span class="identity-roadmap">' + identityUpgradeText(alloc, caps) + '</span>';
                     } else {
                         msg.className = 'optmsg';
                         msg.innerHTML = 'Exact 85 was not reachable while keeping the same type and name. The closest valid identity-preserving reduction was left on screen.<br><span class="identity-roadmap">' + identityUpgradeText(finalTarget, caps) + '</span>';
@@ -11582,6 +11583,10 @@
                     hidePrompt();
                     render();
                 }
+
+                $('preserveMovement').addEventListener('change', function() {
+                    PRESERVE_MOVEMENT = this.checked;
+                });
 
 
                 function optimizeBuild() {
