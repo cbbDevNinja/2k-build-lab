@@ -11492,17 +11492,17 @@
                         render();
                         return;
                     }
+                    var movementAttrs = [9, 10, 17, 18, 20];
                     var identityPenalty = function(a) {
-                        var core = [9, 10, 17, 18, 20];
                         var shot = [2, 1, 6, 5];
                         var support = [8, 12, 13, 14, 15, 16, 19, 11, 0, 3, 4, 7];
-                        if (core.indexOf(a) >= 0)
-                            return 0;
+                        if (movementAttrs.indexOf(a) >= 0)
+                            return 100;
                         if (shot.indexOf(a) >= 0)
-                            return 1;
+                            return 20;
                         if (support.indexOf(a) >= 0)
-                            return 2;
-                        return 3;
+                            return 5;
+                        return 0;
                     };
                     var frontier = [{
                         v: current.slice(),
@@ -11535,7 +11535,7 @@
                             continue;
                         var nexts = [];
                         for (var a = 0; a < 21; a++) {
-                            if (v[a] <= 25 || LOCK[a])
+                            if (v[a] <= 25 || LOCK[a] || movementAttrs.indexOf(a) >= 0)
                                 continue;
                             var t = v.slice();
                             t[a]--;
