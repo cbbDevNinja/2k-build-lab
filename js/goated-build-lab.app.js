@@ -11467,7 +11467,7 @@
                     return steps.length ? 'Upgrade path: ' + steps.join(' · ') + '. Keep Ball Handle and Speed With Ball ahead of secondary upgrades so the build keeps its identity.' : 'Upgrade path: movement and primary scoring attributes are already at their current body ceilings.';
                 }
 
-                var PRESERVE_MOVEMENT = true;
+                var DAY_ONE_BACKUP = null;
                 function reduceToDayOneIdentity() {
                     var B = clampBody()
                       , caps = ceilingsFor(B.h, B.w, B.ws);
@@ -11479,26 +11479,28 @@
                     var keep = KEEPNAME ? name0 : null;
                     var msg = $('optMsg');
                     var currentOvr = overallOf(current, hb, caps);
+                    if (currentOvr > 85 && !DAY_ONE_BACKUP)
+                        DAY_ONE_BACKUP = current.slice();
                     if (currentOvr === 85) {
                         msg.className = 'optmsg ok';
                         msg.innerHTML = '<b>Already at 85 OVR</b> — this build already clears the day-one gate without losing identity.<br><span class="identity-roadmap">' + identityUpgradeText(current, caps) + '</span>';
                         hidePrompt();
                         render();
-                        return;
+                        return true;
                     }
                     if (currentOvr < 85) {
                         msg.className = 'optmsg';
                         msg.innerHTML = 'This build is already below the 85 day-one line, so there is nothing to trim without moving it off its identity.<br><span class="identity-roadmap">' + identityUpgradeText(current, caps) + '</span>';
                         hidePrompt();
                         render();
-                        return;
+                        return false;
                     }
                     var movementAttrs = [9, 10, 17, 18, 20];
                     var identityPenalty = function(a) {
                         var shot = [2, 1, 6, 5];
                         var support = [8, 12, 13, 14, 15, 16, 19, 11, 0, 3, 4, 7];
                         if (movementAttrs.indexOf(a) >= 0)
-                            return PRESERVE_MOVEMENT ? 100 : 20;
+                            return 100;
                         if (shot.indexOf(a) >= 0)
                             return 20;
                         if (support.indexOf(a) >= 0)
@@ -11536,7 +11538,7 @@
                             continue;
                         var nexts = [];
                         for (var a = 0; a < 21; a++) {
-                            if (v[a] <= 25 || LOCK[a] || (PRESERVE_MOVEMENT && movementAttrs.indexOf(a) >= 0))
+                            if (v[a] <= 25 || LOCK[a] || movementAttrs.indexOf(a) >= 0)
                                 continue;
                             var t = v.slice();
                             t[a]--;
@@ -11575,17 +11577,35 @@
                     var finalOvr = overallOf(alloc, hb, caps);
                     if (finalOvr === 85) {
                         msg.className = 'optmsg ok';
-                        msg.innerHTML = '<b>Reduced to 85 OVR</b> — same player type preserved, with movement identity ' + (PRESERVE_MOVEMENT ? 'protected' : 'weighted first') + '.<br><span class="identity-roadmap">' + identityUpgradeText(alloc, caps) + '</span>';
+                        msg.innerHTML = '<b>Reduced to 85 OVR</b> — same player type preserved, with movement identity protected.<br><span class="identity-roadmap">' + identityUpgradeText(alloc, caps) + '</span>';
                     } else {
                         msg.className = 'optmsg';
                         msg.innerHTML = 'Exact 85 was not reachable while keeping the same type and name. The closest valid identity-preserving reduction was left on screen.<br><span class="identity-roadmap">' + identityUpgradeText(finalTarget, caps) + '</span>';
                     }
                     hidePrompt();
                     render();
+                    return finalOvr === 85;
                 }
 
-                $('preserveMovement').addEventListener('change', function() {
-                    PRESERVE_MOVEMENT = this.checked;
+                $('reduce85').addEventListener('change', function() {
+                    if (this.checked) {
+                        if (!reduceToDayOneIdentity()) {
+                            if (DAY_ONE_BACKUP)
+                                alloc = DAY_ONE_BACKUP.slice();
+                            DAY_ONE_BACKUP = null;
+                            this.checked = false;
+                            render();
+                        }
+                        return;
+                    }
+                    if (!DAY_ONE_BACKUP)
+                        return;
+                    alloc = DAY_ONE_BACKUP.slice();
+                    DAY_ONE_BACKUP = null;
+                    hidePrompt();
+                    $('optMsg').className = 'optmsg';
+                    $('optMsg').textContent = 'Restored the original allocation.';
+                    render();
                 });
 
 
@@ -11691,7 +11711,6 @@
                     render();
                 }
                 $('optimize').addEventListener('click', optimizeBuild);
-                $('reduce85').addEventListener('click', reduceToDayOneIdentity);
 
                 /* \u2500\u2500 SEND TO 2K HQ \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
    Turn the build on screen into a real NBA 2K HQ import link.
