@@ -11507,44 +11507,27 @@
                             return 5;
                         return 0;
                     };
-                    var frontier = [{
-                        v: current.slice(),
-                        rank: 0
-                    }];
-                    var seen = {};
                     var best = current.slice();
-                    var bestOvr = currentOvr;
-                    var bestDiff = Infinity;
                     var finalTarget = null;
-                    while (frontier.length) {
-                        frontier.sort(function(x, y) {
-                            return x.rank - y.rank;
-                        });
-                        var state = frontier.shift();
-                        var v = state.v; 
-                        var ovr = overallOf(v, hb, caps);
-                        var diff = Math.abs(85 - ovr);
+                    /* Keep this search bounded: the previous frontier search could enqueue
+       millions of allocations and freeze the browser when the toggle was changed. */
+                    for (var pass = 0; pass < 900 && !finalTarget; pass++) {
+                        var ovr = overallOf(current, hb, caps);
                         if (ovr === 85) {
-                            best = v.slice();
-                            finalTarget = v.slice();
+                            finalTarget = current.slice();
                             break;
                         }
-                        if (diff < bestDiff) {
-                            best = v.slice();
-                            bestOvr = ovr;
-                            bestDiff = diff;
-                        }
-                        if (ovr < 85)
-                            continue;
-                        var nexts = [];
+                        var candidate = null
+                          , candidateOvr = -Infinity
+                          , candidatePenalty = Infinity;
                         for (var a = 0; a < 21; a++) {
-                            if (v[a] <= 25 || LOCK[a] || movementAttrs.indexOf(a) >= 0)
+                            if (current[a] <= 25 || LOCK[a] || movementAttrs.indexOf(a) >= 0)
                                 continue;
-                            var t = v.slice();
+                            var t = current.slice();
                             t[a]--;
                             settle(t, hb, caps);
                             if (t.some(function(val, i) {
-                                return val > caps[i] || (LOCK[i] && val !== v[i]);
+                                return val > caps[i] || (LOCK[i] && val !== current[i]);
                             }))
                                 continue;
                             if (ptOf(t, hb) !== pt0)
@@ -11552,27 +11535,24 @@
                             if (keep && nameOf(t, pos) !== keep)
                                 continue;
                             var nextOvr = overallOf(t, hb, caps);
-                            if (nextOvr > 99)
+                            if (nextOvr < 85 || nextOvr >= ovr)
                                 continue;
-                            var score = nextOvr === 85 ? 0 : (nextOvr < 85 ? 900 + (85 - nextOvr) : Math.abs(85 - nextOvr) + 10 + identityPenalty(a));
-                            nexts.push({
-                                v: t,
-                                rank: score + identityPenalty(a) * 2
-                            });
+                            var penalty = identityPenalty(a);
+                            if (!candidate || nextOvr > candidateOvr || (nextOvr === candidateOvr && penalty < candidatePenalty)) {
+                                candidate = t;
+                                candidateOvr = nextOvr;
+                                candidatePenalty = penalty;
+                            }
                         }
-                        nexts.sort(function(x, y) {
-                            return x.rank - y.rank;
-                        });
-                        nexts.forEach(function(item) {
-                            var key = item.v.join('.');
-                            if (seen[key])
-                                return;
-                            seen[key] = 1;
-                            frontier.push(item);
-                        });
+                        if (!candidate)
+                            break;
+                        current = candidate;
+                        best = current.slice();
                     }
-                    if (!finalTarget)
+                    if (!finalTarget && overallOf(best, hb, caps) === 85)
                         finalTarget = best;
+                    if (!finalTarget)
+                        finalTarget = currentOvr === 85 ? current : best;
                     alloc = finalTarget.slice();
                     var finalOvr = overallOf(alloc, hb, caps);
                     if (finalOvr === 85) {
