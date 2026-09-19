@@ -11474,9 +11474,6 @@
                     var hb = Math.max(0, Math.min(30, B.h - 63));
                     var pos = +$('pos').value;
                     var current = alloc.slice();
-                    var pt0 = ptOf(current, hb)
-                      , name0 = nameOf(current, pos);
-                    var keep = KEEPNAME ? name0 : null;
                     var msg = $('optMsg');
                     var currentOvr = overallOf(current, hb, caps);
                     if (currentOvr > 85 && !DAY_ONE_BACKUP)
@@ -11530,10 +11527,6 @@
                                 return val > caps[i] || (LOCK[i] && val !== current[i]);
                             }))
                                 continue;
-                            if (ptOf(t, hb) !== pt0)
-                                continue;
-                            if (keep && nameOf(t, pos) !== keep)
-                                continue;
                             var nextOvr = overallOf(t, hb, caps);
                             if (nextOvr < 85 || nextOvr >= ovr)
                                 continue;
@@ -11557,10 +11550,10 @@
                     var finalOvr = overallOf(alloc, hb, caps);
                     if (finalOvr === 85) {
                         msg.className = 'optmsg ok';
-                        msg.innerHTML = '<b>Reduced to 85 OVR</b> — same player type preserved, with movement identity protected.<br><span class="identity-roadmap">' + identityUpgradeText(alloc, caps) + '</span>';
+                        msg.innerHTML = '<b>Reduced to 85 OVR</b> — movement identity protected; player type or name may change to reach the exact day-one rating.<br><span class="identity-roadmap">' + identityUpgradeText(alloc, caps) + '</span>';
                     } else {
                         msg.className = 'optmsg';
-                        msg.innerHTML = 'Exact 85 was not reachable while keeping the same type and name. The closest valid identity-preserving reduction was left on screen.<br><span class="identity-roadmap">' + identityUpgradeText(finalTarget, caps) + '</span>';
+                        msg.innerHTML = 'Exact 85 was not reachable while protecting movement identity. The closest valid reduction was left on screen.<br><span class="identity-roadmap">' + identityUpgradeText(finalTarget, caps) + '</span>';
                     }
                     hidePrompt();
                     render();
