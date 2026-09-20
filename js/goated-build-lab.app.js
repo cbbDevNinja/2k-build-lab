@@ -11492,16 +11492,16 @@
                         render();
                         return false;
                     }
-                    var movementAttrs = [9, 10, 17, 18, 20];
+                    var priorityAttrs = [17, 18, 6, 12];
                     var identityPenalty = function(a) {
-                        var shot = [2, 1, 6, 5];
-                        var support = [8, 12, 13, 14, 15, 16, 19, 11, 0, 3, 4, 7];
-                        if (movementAttrs.indexOf(a) >= 0)
-                            return 100;
-                        if (shot.indexOf(a) >= 0)
-                            return 20;
-                        if (support.indexOf(a) >= 0)
-                            return 5;
+                        if (a === 17)
+                            return 1000;
+                        if (a === 18)
+                            return 900;
+                        if (a === 6)
+                            return 800;
+                        if (a === 12)
+                            return 700;
                         return 0;
                     };
                     var best = current.slice();
@@ -11522,7 +11522,7 @@
                                 var source = beam[bi].v
                                   , sourceOvr = overallOf(source, hb, caps);
                                 for (var a = 0; a < 21; a++) {
-                                    if (source[a] <= 25 || LOCK[a] || (!allowMovement && movementAttrs.indexOf(a) >= 0))
+                                    if (source[a] <= 25 || LOCK[a] || (!allowMovement && priorityAttrs.indexOf(a) >= 0))
                                         continue;
                                     var t = source.slice();
                                     t[a]--;
@@ -11571,10 +11571,10 @@
                     var finalOvr = overallOf(alloc, hb, caps);
                     if (finalOvr === 85) {
                         msg.className = 'optmsg ok';
-                        msg.innerHTML = '<b>Reduced to 85 OVR</b> — ' + (usedMovementFallback ? 'a movement attribute was allowed to change because exact 85 required it' : 'movement identity protected') + '; player type or name may change.<br><span class="identity-roadmap">' + identityUpgradeText(alloc, caps) + '</span>';
+                        msg.innerHTML = '<b>Reduced to 85 OVR</b> — ' + (usedMovementFallback ? 'a priority attribute was allowed to change because exact 85 required it' : 'Speed, Agility, Three-Point, and Perimeter Defense protected') + '; player type or name may change.<br><span class="identity-roadmap">' + identityUpgradeText(alloc, caps) + '</span>';
                     } else {
                         msg.className = 'optmsg';
-                        msg.innerHTML = 'Exact 85 was not reachable while protecting movement identity. The closest valid reduction was left on screen.<br><span class="identity-roadmap">' + identityUpgradeText(finalTarget, caps) + '</span>';
+                        msg.innerHTML = 'Exact 85 was not reachable while protecting the priority attributes. The closest valid reduction was left on screen.<br><span class="identity-roadmap">' + identityUpgradeText(finalTarget, caps) + '</span>';
                     }
                     hidePrompt();
                     render();
