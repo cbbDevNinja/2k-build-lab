@@ -11506,6 +11506,9 @@
                     };
                     var best = current.slice();
                     var finalTarget = null;
+                    var start = current.slice();
+                    var protectMovement = true;
+                    var usedMovementFallback = false;
                     /* Keep this search bounded: the previous frontier search could enqueue
        millions of allocations and freeze the browser when the toggle was changed. */
                     for (var pass = 0; pass < 900 && !finalTarget; pass++) {
@@ -11518,7 +11521,7 @@
                           , candidateOvr = -Infinity
                           , candidatePenalty = Infinity;
                         for (var a = 0; a < 21; a++) {
-                            if (current[a] <= 25 || LOCK[a] || movementAttrs.indexOf(a) >= 0)
+                            if (current[a] <= 25 || LOCK[a] || (protectMovement && movementAttrs.indexOf(a) >= 0))
                                 continue;
                             var t = current.slice();
                             t[a]--;
@@ -11537,8 +11540,16 @@
                                 candidatePenalty = penalty;
                             }
                         }
-                        if (!candidate)
+                        if (!candidate) {
+                            if (protectMovement) {
+                                protectMovement = false;
+                                usedMovementFallback = true;
+                                current = start.slice();
+                                best = current.slice();
+                                continue;
+                            }
                             break;
+                        }
                         current = candidate;
                         best = current.slice();
                     }
@@ -11550,7 +11561,7 @@
                     var finalOvr = overallOf(alloc, hb, caps);
                     if (finalOvr === 85) {
                         msg.className = 'optmsg ok';
-                        msg.innerHTML = '<b>Reduced to 85 OVR</b> — movement identity protected; player type or name may change to reach the exact day-one rating.<br><span class="identity-roadmap">' + identityUpgradeText(alloc, caps) + '</span>';
+                        msg.innerHTML = '<b>Reduced to 85 OVR</b> — ' + (usedMovementFallback ? 'a movement attribute was allowed to change because exact 85 required it' : 'movement identity protected') + '; player type or name may change.<br><span class="identity-roadmap">' + identityUpgradeText(alloc, caps) + '</span>';
                     } else {
                         msg.className = 'optmsg';
                         msg.innerHTML = 'Exact 85 was not reachable while protecting movement identity. The closest valid reduction was left on screen.<br><span class="identity-roadmap">' + identityUpgradeText(finalTarget, caps) + '</span>';
