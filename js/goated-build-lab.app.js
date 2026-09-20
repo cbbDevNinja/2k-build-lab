@@ -11507,56 +11507,64 @@
                     var best = current.slice();
                     var finalTarget = null;
                     var start = current.slice();
-                    var protectMovement = true;
                     var usedMovementFallback = false;
-                    /* Keep this search bounded: the previous frontier search could enqueue
-       millions of allocations and freeze the browser when the toggle was changed. */
-                    for (var pass = 0; pass < 900 && !finalTarget; pass++) {
-                        var ovr = overallOf(current, hb, caps);
-                        if (ovr === 85) {
-                            finalTarget = current.slice();
-                            break;
-                        }
-                        var candidate = null
-                          , candidateOvr = -Infinity
-                          , candidatePenalty = Infinity;
-                        for (var a = 0; a < 21; a++) {
-                            if (current[a] <= 25 || LOCK[a] || (protectMovement && movementAttrs.indexOf(a) >= 0))
-                                continue;
-                            var t = current.slice();
-                            t[a]--;
-                            settle(t, hb, caps);
-                            if (t.some(function(val, i) {
-                                return val > caps[i] || (LOCK[i] && val !== current[i]);
-                            }))
-                                continue;
-                            var nextOvr = overallOf(t, hb, caps);
-                            if (nextOvr < 85 || nextOvr >= ovr)
-                                continue;
-                            var penalty = identityPenalty(a);
-                            if (!candidate || nextOvr > candidateOvr || (nextOvr === candidateOvr && penalty < candidatePenalty)) {
-                                candidate = t;
-                                candidateOvr = nextOvr;
-                                candidatePenalty = penalty;
+                    /* Keep this search bounded: a small beam preserves alternate reduction
+       paths without recreating the unbounded frontier that froze the page. */
+                    function searchReduction(allowMovement) {
+                        var beam = [{v: start.slice(), score: 0}]
+                          , seen = {}
+                          , closest = start.slice()
+                          , closestOvr = currentOvr;
+                        seen[start.join('.') ] = true;
+                        for (var depth = 0; depth < 600 && beam.length; depth++) {
+                            var next = [];
+                            for (var bi = 0; bi < beam.length; bi++) {
+                                var source = beam[bi].v
+                                  , sourceOvr = overallOf(source, hb, caps);
+                                for (var a = 0; a < 21; a++) {
+                                    if (source[a] <= 25 || LOCK[a] || (!allowMovement && movementAttrs.indexOf(a) >= 0))
+                                        continue;
+                                    var t = source.slice();
+                                    t[a]--;
+                                    settle(t, hb, caps);
+                                    if (t.some(function(val, i) {
+                                        return val > caps[i] || (LOCK[i] && val !== source[i]);
+                                    }))
+                                        continue;
+                                    var nextOvr = overallOf(t, hb, caps);
+                                    if (nextOvr < 85 || nextOvr >= sourceOvr)
+                                        continue;
+                                    if (nextOvr === 85)
+                                        return {v: t, exact: true};
+                                    if (nextOvr < closestOvr) {
+                                        closest = t.slice();
+                                        closestOvr = nextOvr;
+                                    }
+                                    var key = t.join('.');
+                                    if (seen[key])
+                                        continue;
+                                    seen[key] = true;
+                                    next.push({
+                                        v: t,
+                                        score: (nextOvr - 85) * 100 + identityPenalty(a)
+                                    });
+                                }
                             }
+                            next.sort(function(x, y) { return x.score - y.score; });
+                            beam = next.slice(0, 16);
                         }
-                        if (!candidate) {
-                            if (protectMovement) {
-                                protectMovement = false;
-                                usedMovementFallback = true;
-                                current = start.slice();
-                                best = current.slice();
-                                continue;
-                            }
-                            break;
-                        }
-                        current = candidate;
-                        best = current.slice();
+                        return {v: closest, exact: false};
                     }
-                    if (!finalTarget && overallOf(best, hb, caps) === 85)
-                        finalTarget = best;
-                    if (!finalTarget)
-                        finalTarget = currentOvr === 85 ? current : best;
+                    var protectedSearch = searchReduction(false);
+                    if (protectedSearch.exact) {
+                        finalTarget = protectedSearch.v;
+                        best = finalTarget;
+                    } else {
+                        var fallbackSearch = searchReduction(true);
+                        finalTarget = fallbackSearch.v;
+                        best = finalTarget;
+                        usedMovementFallback = fallbackSearch.exact;
+                    }
                     alloc = finalTarget.slice();
                     var finalOvr = overallOf(alloc, hb, caps);
                     if (finalOvr === 85) {
