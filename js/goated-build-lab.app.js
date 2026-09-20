@@ -11532,7 +11532,9 @@
                                     }))
                                         continue;
                                     var nextOvr = overallOf(t, hb, caps);
-                                    if (nextOvr < 85 || nextOvr >= sourceOvr)
+                                    /* A point can be reduced without changing displayed OVR. Those
+       neutral states still matter because the next reduction may cross to exact 85. */
+                                    if (nextOvr < 85 || nextOvr > sourceOvr)
                                         continue;
                                     if (nextOvr === 85)
                                         return {v: t, exact: true};
@@ -11551,7 +11553,7 @@
                                 }
                             }
                             next.sort(function(x, y) { return x.score - y.score; });
-                            beam = next.slice(0, 16);
+                            beam = next.slice(0, 32);
                         }
                         return {v: closest, exact: false};
                     }
