@@ -11493,16 +11493,18 @@
                         return false;
                     }
                     var priorityAttrs = [17, 18, 6, 12];
-                    var identityPenalty = function(a) {
+                    var physicalAttrs = [17, 18, 19, 20];
+                    function reductionCost(a, source) {
+                        var cost = Math.max(0, source[a] - 60) * (physicalAttrs.indexOf(a) >= 0 ? 14 : 5);
                         if (a === 17)
-                            return 1000;
-                        if (a === 18)
-                            return 900;
-                        if (a === 6)
-                            return 800;
-                        if (a === 12)
-                            return 700;
-                        return 0;
+                            cost += 1000;
+                        else if (a === 18)
+                            cost += 900;
+                        else if (a === 6)
+                            cost += 800;
+                        else if (a === 12)
+                            cost += 700;
+                        return cost;
                     };
                     var best = current.slice();
                     var finalTarget = null;
@@ -11548,7 +11550,7 @@
                                     seen[key] = true;
                                     next.push({
                                         v: t,
-                                        score: (nextOvr - 85) * 100 + identityPenalty(a)
+                                        score: (nextOvr - 85) * 100 + reductionCost(a, source)
                                     });
                                 }
                             }
